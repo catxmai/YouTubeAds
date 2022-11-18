@@ -1,14 +1,18 @@
 import logging
 import re
+import time
 from typing import Any
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import *
 
 import api
+import get_ad_info
+from video_controls import *
 
 
-def get_video_info(driver: webdriver.Chrome) -> dict:
+def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
     """
     Parameters
     ----------
@@ -20,19 +24,62 @@ def get_video_info(driver: webdriver.Chrome) -> dict:
 
     """
 
+    driver.get(video_url)
     video_id = get_video_id(driver)
+
+    # selenium + youtube has strange behaviour when paused immediately after
+    # retrieving a url and will sometimes skip the ad prematurely, so we play
+    # the video for two seconds before collecting info
+    play_video(driver)
+    time.sleep(2)
+    pause_video(driver)
     video_data = api.get_info(video_id)
 
     video_data["urls_in_description"] = extract_urls(video_data["description"])
     video_data["comments_disabled"] = check_if_comments_disabled(driver)
     video_data["context_box_present"] = check_for_context_box(driver)
-    video_data["merch_info"] = get_merch_info(driver)  # TODO implement
-    # TODO: get ad info function
-    # TODO: skip ad function
+    video_data["merch_info"] = get_merch_info(driver)
+
+    is_preroll = get_ad_info.check_for_preroll(driver)
+    if is_preroll:
+        ad_id = get_ad_info.get_ad_id(driver)
+        why_info = get_ad_info.get_why_this_ad_info(driver)
+        ad_url = get_ad_info.get_preroll_advertiser_url(driver)
+
+        number_of_ads_left = get_ad_info.get_number_of_ads_left(driver)
+        if number_of_ads_left == 1:
+            wait_for_ad(driver)
+            pause_video(driver)
+            ad_id_2 = get_ad_info.get_ad_id(driver)
+            why_info_2 = get_ad_info.get_why_this_ad_info(driver)
+            ad_url_2 = get_ad_info.get_preroll_advertiser_url(driver)
+
+        if get_ad_info.is_skippable(driver):
+            # wait 5 seconds for ad to become skippable
+            time.sleep(5)
+            skip_ad(driver)
+            # wait 1 second for main video to load
+            time.sleep(1)
+        else:
+            wait_for_ad(driver)
+
+        pause_video(driver)
+
+    # check for banner ads
+
     video_data["is_paid_promotion"] = check_sponsor_info(driver)
+
+    if get_ad_info.check_for_sparkles_ad(driver):
+        sparkles_why = get_ad_info.get_sparkles_info(driver)
+        sparkles_url = get_ad_info.get_sparkles_ad_url(driver)
+
+    if get_ad_info.check_for_promoted_video(driver):
+        promoted_info = get_ad_info.get_promoted_video_info(driver)
+        promoted_video_id = get_ad_info.get_promoted_video_id(driver)
+
     video_data["recommended_videos"] = get_recommended_videos(driver)
 
-    return video_data  # TODO: convert video data to pandas dataframe
+    return video_data
 
 
 def get_video_id(driver: webdriver.Chrome) -> str:
@@ -100,7 +147,6 @@ def extract_urls(text: str) -> list:
     -------
     urls: a list of urls extracted from the input string
 
-
     """
 
     pattern: str = r"[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)"
@@ -110,8 +156,42 @@ def extract_urls(text: str) -> list:
     return urls
 
 
-def get_merch_info(s):
-    pass
+def get_merch_info(driver: webdriver.Chrome) -> str:
+    """
+    Parameters
+    ----------
+    driver: a selenium webdriver object (should be pointed at a YouTube video)
+
+    Returns
+    -------
+    url: url of the merch store or a blank string if no merch store is found
+
+    """
+
+    url: str = ""
+    try:
+        merch_shelf = driver.find_element(
+            By.CSS_SELECTOR,
+            "a.yt-simple-endpoint.style-scope.ytd-merch-shelf-item-renderer",
+        )
+        merch_shelf.click()
+
+        # save current tab and switch chromedriver's focus to the new tab
+        video_tab = driver.current_window_handle
+        tabs_open = driver.window_handles
+        driver.switch_to.window(tabs_open[1])
+
+        # wait 5 secs to account for possible redirects
+        time.sleep(5)
+        url = driver.current_url
+        driver.close()
+
+        # return control to original tab
+        driver.switch_to.window(video_tab)
+    except NoSuchElementException:
+        pass
+
+    return url
 
 
 def get_recommended_videos(driver):
@@ -120,7 +200,12 @@ def get_recommended_videos(driver):
 
 def check_sponsor_info(driver: webdriver.Chrome) -> bool:
     """
-    NOTE: Must be checked after getting through the ad or it will not work
+    NOTE:
+
+    Must be checked after getting through the ad or it will not work.
+
+    Also be aware that it disappears after several seconds so it must be captured
+    within the first few seconds.
 
     Parameters
     ----------

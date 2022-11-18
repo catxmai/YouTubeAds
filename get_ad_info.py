@@ -1,12 +1,24 @@
+import time
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import *
-import time
 from selenium.webdriver import ActionChains
 
 
-def check_for_banner(driver):
-    banner_present = False
+def check_for_banner(driver: webdriver.Chrome) -> bool:
+    """
+    Parameters
+    ----------
+    driver: a selenium webdriver object (should be pointed at a YouTube video)
+
+    Returns
+    -------
+    banner_present: a bool indicating the presence of a banner ad
+
+    """
+
+    banner_present: bool = False
     try:
         banner = driver.find_element(By.CSS_SELECTOR, ".ytp-ad-overlay-image")
         banner_present = True
@@ -15,8 +27,19 @@ def check_for_banner(driver):
     return banner_present
 
 
-def check_for_preroll(driver):
-    preroll_present = False
+def check_for_preroll(driver: webdriver.Chrome) -> bool:
+    """
+    Parameters
+    ----------
+    driver: a selenium webdriver object (should be pointed at a YouTube video)
+
+    Returns
+    -------
+    preroll_present: a bool indicating the presence of a preroll ad
+
+    """
+
+    preroll_present: bool = False
     try:
         element = driver.find_element(By.CSS_SELECTOR, ".ytp-ad-text")
         preroll_present = True
@@ -25,7 +48,7 @@ def check_for_preroll(driver):
     return preroll_present
 
 
-def get_why_this_ad_info(driver: webdriver.Chrome):
+def get_why_this_ad_info(driver: webdriver.Chrome) -> list:
     """
     Parameters
     ----------
@@ -35,9 +58,9 @@ def get_why_this_ad_info(driver: webdriver.Chrome):
     -------
     reasons: list of reasons youtube provides for why the ad was served to the user
 
-
     """
-    reasons = []
+
+    reasons: list = []
     try:
         info_button = driver.find_element(
             By.CSS_SELECTOR,
@@ -73,7 +96,7 @@ def get_ad_id(driver: webdriver.Chrome) -> str:
 
     """
 
-    ad_id = ""
+    ad_id: str = ""
     try:
         # right clicking the video and opening the "stats for nerds" menu
         action = ActionChains(driver)
@@ -100,7 +123,18 @@ def get_ad_id(driver: webdriver.Chrome) -> str:
     return ad_id
 
 
-def get_preroll_advertiser_url(driver):
+def get_preroll_advertiser_url(driver: webdriver.Chrome) -> str:
+    """
+    Parameters
+    ----------
+    driver: a selenium webdriver object (should be pointed at a YouTube video)
+
+    Returns
+    -------
+    url: url linked to by the preroll advertisement
+
+    """
+
     element = driver.find_element(
         By.CSS_SELECTOR,
         "button.ytp-ad-button.ytp-ad-visit-advertiser-button.ytp-ad-button-link",
@@ -115,14 +149,27 @@ def get_preroll_advertiser_url(driver):
 
     # wait 5 secs to account for possible redirects
     time.sleep(5)
-    url = driver.current_url
+    url: str = driver.current_url
+
+    # close tab and switch back to main tab
     driver.close()
     driver.switch_to.window(video_tab)
 
     return url
 
 
-def get_banner_advertiser(driver):
+def get_banner_advertiser(driver: webdriver.Chrome) -> str:
+    """
+    Parameters
+    ----------
+    driver: a selenium webdriver object (should be pointed at a YouTube video)
+
+    Returns
+    -------
+    url: url linked to by the banner advertisement
+
+    """
+
     banner = driver.find_element(By.CSS_SELECTOR, ".ytp-ad-overlay-image")
     banner.click()
 
@@ -133,40 +180,75 @@ def get_banner_advertiser(driver):
 
     # wait 5 secs to account for possible redirects
     time.sleep(5)
-    url = driver.current_url
+    url: str = driver.current_url
+
+    # close tab and switch back to main tab
     driver.close()
     driver.switch_to.window(video_tab)
 
     return url
 
 
-def get_number_of_ads_left(driver):
+def get_number_of_ads_left(driver: webdriver.Chrome) -> int:
+    """
+    Parameters
+    ----------
+    driver: a selenium webdriver object (should be pointed at a YouTube video)
+
+    Returns
+    -------
+    number_of_ads_left: the number of ads left before the main video plays
+
+    """
+
+    number_of_ads_left: int = 0
+
     elements = driver.find_elements(By.CSS_SELECTOR, ".ytp-ad-text")
-    text = [element.text for element in elements]
+    text: list = [element.text for element in elements]
+
     if any(["Ad 1 of 2" in msg for msg in text]):
-        return 1
-    else:
-        return 0
+        number_of_ads_left = 1
+
+    return number_of_ads_left
 
 
-def is_skippable(driver):
+def is_skippable(driver: webdriver.Chrome) -> bool:
+    """
+    Parameters
+    ----------
+    driver: a selenium webdriver object (should be pointed at a YouTube video)
+
+    Returns
+    -------
+    is_skippable: a bool indicating whether the current advertisement is a
+    skippable ad
+
+    """
+
+    is_skippable: bool = True
+
     elements = driver.find_elements(By.CSS_SELECTOR, ".ytp-ad-text")
-    text = [element.text for element in elements]
+    text: list = [element.text for element in elements]
+
     if any(["Ad will end" in msg for msg in text]):
-        return False
-    else:
-        return True
+        is_skippable = False
+
+    return is_skippable
 
 
-def skip_ad(driver):
-    skip_button = driver.find_element(
-        By.CSS_SELECTOR, "button.ytp-ad-skip-button.ytp-button"
-    )
-    skip_button.click()
+def check_for_sparkles_ad(driver: webdriver.Chrome) -> bool:
+    """
+    Parameters
+    ----------
+    driver: a selenium webdriver object (should be pointed at a YouTube video)
 
+    Returns
+    -------
+    sparkles_present: a bool indicating the presence of a "sparkles" ad
 
-def check_for_sparkles_ad(driver):
-    sparkles_present = False
+    """
+
+    sparkles_present: bool = False
     try:
         element = driver.find_element(By.CSS_SELECTOR, "#sparkles-container")
         sparkles_present = True
@@ -175,8 +257,20 @@ def check_for_sparkles_ad(driver):
     return sparkles_present
 
 
-def check_for_promoted_video(driver):
-    promoted_video_present = False
+def check_for_promoted_video(driver: webdriver.Chrome) -> bool:
+    """
+    Parameters
+    ----------
+    driver: a selenium webdriver object (should be pointed at a YouTube video)
+
+    Returns
+    -------
+    promoted_video_present: a bool indicating the presence of a promoted at the top
+    of the recommended videos list
+
+    """
+
+    promoted_video_present: bool = False
     try:
         element = driver.find_element(
             By.CSS_SELECTOR, "#items > ytd-compact-promoted-video-renderer"
@@ -187,8 +281,19 @@ def check_for_promoted_video(driver):
     return promoted_video_present
 
 
-def get_promoted_video_info(driver):
-    menu_button = element = driver.find_element(
+def get_promoted_video_info(driver: webdriver.Chrome) -> list:
+    """
+    Parameters
+    ----------
+    driver: a selenium webdriver object (should be pointed at a YouTube video)
+
+    Returns
+    -------
+    reasons: list of reasons youtube provides for why the ad was served to the user
+
+    """
+
+    menu_button = driver.find_element(
         By.CSS_SELECTOR,
         ".style-scope.ytd-compact-promoted-video-renderer > yt-icon-button > button",
     )
@@ -201,7 +306,7 @@ def get_promoted_video_info(driver):
     info_button.click()
     iframe = driver.find_element(By.ID, "iframe")
     driver.switch_to.frame(iframe)
-    reasons = driver.find_elements(By.CSS_SELECTOR, ".Xkwrgc")
+    reasons: list = driver.find_elements(By.CSS_SELECTOR, ".Xkwrgc")
     reasons = [element.text for element in reasons]  # type: ignore[misc]
     exit_button = driver.find_element(
         By.CSS_SELECTOR, ".VfPpkd-Bz112c-LgbsSe.yHy1rc.eT1oJ.mN1ivc.YJBIwf"
@@ -212,7 +317,22 @@ def get_promoted_video_info(driver):
     return reasons
 
 
-def get_sparkles_info(driver):
+def get_promoted_video_id(driver: webdriver.Chrome) -> str:
+    pass
+
+
+def get_sparkles_info(driver: webdriver.Chrome) -> list:
+    """
+    Parameters
+    ----------
+    driver: a selenium webdriver object (should be pointed at a YouTube video)
+
+    Returns
+    -------
+    reasons: list of reasons youtube provides for why the ad was served to the user
+
+    """
+
     menu_button = driver.find_element(
         By.CSS_SELECTOR,
         ".style-scope.ytd-promoted-sparkles-web-renderer > yt-icon-button > button",
@@ -225,7 +345,7 @@ def get_sparkles_info(driver):
     info_button.click()
     iframe = driver.find_element(By.ID, "iframe")
     driver.switch_to.frame(iframe)
-    reasons = driver.find_elements(By.CSS_SELECTOR, ".Xkwrgc")
+    reasons: list = driver.find_elements(By.CSS_SELECTOR, ".Xkwrgc")
     reasons = [element.text for element in reasons]  # type: ignore[misc]
     exit_button = driver.find_element(
         By.CSS_SELECTOR, ".VfPpkd-Bz112c-LgbsSe.yHy1rc.eT1oJ.mN1ivc.YJBIwf"
@@ -233,10 +353,24 @@ def get_sparkles_info(driver):
     exit_button.click()
     driver.switch_to.default_content()
 
+    return reasons
 
-def get_sparkles_ad_url(driver):
+
+def get_sparkles_ad_url(driver: webdriver.Chrome) -> str:
+    """
+    Parameters
+    ----------
+    driver: a selenium webdriver object (should be pointed at a YouTube video)
+
+    Returns
+    -------
+    url: url linked to by the "sparkles" advertisement
+
+    """
+
     element = driver.find_element(
-        By.CSS_SELECTOR, "#action-button > ytd-button-renderer > a"
+        By.CSS_SELECTOR,
+        ".style-scope.ytd-promoted-sparkles-web-renderer > yt-button-shape > button",
     )
 
     element.click()
@@ -248,12 +382,8 @@ def get_sparkles_ad_url(driver):
 
     # wait 5 secs to account for possible redirects
     time.sleep(5)
-    url = driver.current_url
+    url: str = driver.current_url
     driver.close()
     driver.switch_to.window(video_tab)
 
     return url
-
-
-def check_for_ads(driver):
-    pass
