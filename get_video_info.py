@@ -1,7 +1,7 @@
 import logging
 import re
 import time
-from typing import Any
+from typing import Any, Dict
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -26,6 +26,7 @@ def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
 
     driver.get(video_url)
     video_id = get_video_id(driver)
+    time.sleep(2)
 
     # selenium + youtube has strange behaviour when paused immediately after
     # retrieving a url and will sometimes skip the ad prematurely, so we play
@@ -41,22 +42,45 @@ def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
     video_data["merch_info"] = get_merch_info(driver)
 
     is_preroll = get_ad_info.check_for_preroll(driver)
+    video_data["is_preroll"] = str(is_preroll)
+
+    video_data["preroll_data"] = ""
+
     if is_preroll:
-        ad_id = get_ad_info.get_ad_id(driver)
-        why_info = get_ad_info.get_why_this_ad_info(driver)
-        ad_url = get_ad_info.get_preroll_advertiser_url(driver)
+        preroll_data = []
+        preroll_ad_1: Dict[str, str] = {}
+        preroll_ad_1["ad_id"] = get_ad_info.get_ad_id(driver)
+        preroll_ad_1["why_info"] = str(
+            get_ad_info.get_why_this_ad_info(driver)
+        )  # Warn: list to str conversion
+        preroll_ad_1["ad_url"] = get_ad_info.get_preroll_advertiser_url(driver)
+
+        preroll_data.append(preroll_ad_1)
 
         number_of_ads_left = get_ad_info.get_number_of_ads_left(driver)
         if number_of_ads_left == 1:
+            preroll_ad_2: Dict[str, str] = {}
             wait_for_ad(driver)
+            play_video(driver)
+            time.sleep(2)
             pause_video(driver)
-            ad_id_2 = get_ad_info.get_ad_id(driver)
-            why_info_2 = get_ad_info.get_why_this_ad_info(driver)
-            ad_url_2 = get_ad_info.get_preroll_advertiser_url(driver)
+            preroll_ad_2["ad_id"] = get_ad_info.get_ad_id(driver)
+            preroll_ad_2["why_info"] = str(
+                get_ad_info.get_why_this_ad_info(driver)
+            )  # Warn: list to str conversion
+            preroll_ad_2["ad_url"] = get_ad_info.get_preroll_advertiser_url(
+                driver
+            )
+            preroll_data.append(preroll_ad_2)
+
+        video_data["preroll_data"] = str(
+            preroll_data
+        )  # Warn: list to str conversion
 
         if get_ad_info.is_skippable(driver):
+            play_video(driver)
             # wait 5 seconds for ad to become skippable
-            time.sleep(5)
+            time.sleep(6)
             skip_ad(driver)
             # wait 1 second for main video to load
             time.sleep(1)
@@ -69,13 +93,27 @@ def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
 
     video_data["is_paid_promotion"] = check_sponsor_info(driver)
 
+    video_data["sparkles_ad_present"] = "False"
+    video_data["sparkles_ad_info"] = ""
+    video_data["sparkles_url"] = ""
+
     if get_ad_info.check_for_sparkles_ad(driver):
-        sparkles_why = get_ad_info.get_sparkles_info(driver)
-        sparkles_url = get_ad_info.get_sparkles_ad_url(driver)
+        video_data["sparkles_ad_present"] = "True"
+        video_data["sparkles_ad_info"] = get_ad_info.get_sparkles_info(driver)
+        video_data["sparkles_url"] = get_ad_info.get_sparkles_ad_url(driver)
+
+    video_data["promoted_video_present"] = "False"
+    video_data["promoted_video_info"] = ""
+    video_data["promoted_video_id"] = ""
 
     if get_ad_info.check_for_promoted_video(driver):
-        promoted_info = get_ad_info.get_promoted_video_info(driver)
-        promoted_video_id = get_ad_info.get_promoted_video_id(driver)
+        video_data["promoted_video_present"] = "True"
+        video_data["promoted_video_info"] = get_ad_info.get_promoted_video_info(
+            driver
+        )
+        video_data["promoted_video_id"] = get_ad_info.get_promoted_video_id(
+            driver
+        )
 
     video_data["recommended_videos"] = get_recommended_videos(driver)
 
@@ -251,8 +289,8 @@ def check_for_context_box(driver: webdriver.Chrome) -> bool:
 
         # check if either of the clarify box exists and has text
         if container.text:
-            content_box_present = True
+            context_box_present = True
     except:
         pass
 
-    return content_box_present
+    return context_box_present

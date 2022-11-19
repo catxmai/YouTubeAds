@@ -1,3 +1,4 @@
+from urllib.parse import urlparse, parse_qs
 import time
 
 from selenium import webdriver
@@ -318,7 +319,27 @@ def get_promoted_video_info(driver: webdriver.Chrome) -> list:
 
 
 def get_promoted_video_id(driver: webdriver.Chrome) -> str:
-    pass
+    """
+    Parameters
+    ----------
+    driver: a selenium webdriver object (should be pointed at a YouTube video)
+
+    Returns
+    -------
+    video_id: video_id value for the promoted video
+
+    """
+
+    element = driver.find_element(
+        By.CSS_SELECTOR,
+        "a.yt-simple-endpoint.style-scope.ytd-compact-promoted-video-renderer",
+    )
+
+    raw_url = element.get_attribute("href")
+
+    video_id = parse_qs(urlparse(raw_url).query)["video_id"][0]
+
+    return video_id
 
 
 def get_sparkles_info(driver: webdriver.Chrome) -> list:

@@ -8,9 +8,13 @@ def create_driver(config=""):
 
 
 if __name__ == "__main__":
-    url_list: list = []
+    url_list: list = [
+        "https://www.youtube.com/watch?v=u3sTkewqnkc",
+    ]
     driver = create_driver()
     data: list = []
 
     for url in url_list:
         data.append(get_video_info(url, driver))
+
+    print(data)

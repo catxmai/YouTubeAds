@@ -83,4 +83,5 @@ def wait_for_ad(driver: webdriver.Chrome):
 
     # one second is added to the time left because there is a small buffer period between the end of the ad
     # and the loading of the main video
+    play_video(driver)
     time.sleep(time_left + 1)
