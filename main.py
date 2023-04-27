@@ -12,7 +12,7 @@ if __name__ == "__main__":
     df.drop_duplicates(inplace=True)
 
     url_list = [
-        "https://www.youtube.com/watch?v="+i for i in df['videoid']
+        "https://www.youtube.com/watch?v="+ i for i in df['videoid']
     ]
 
     driver = create_driver()
