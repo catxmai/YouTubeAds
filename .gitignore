@@ -3,3 +3,5 @@ keys.py
 /__pycache__
 /chromedriver_win32
 *.exe
+*.txt
+*.json
