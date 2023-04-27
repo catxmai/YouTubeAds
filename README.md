@@ -21,6 +21,6 @@ Create a file called `config.json` in the main folder of this repo that follows 
 {
 	"username": "johndoe123",
 	"password": "password123",
-	"user_data": "C:\Users\jdoe\Documents\ThisRepo\UserData"
+	"user_data": "C:\\Users\\jdoe\\Documents\\ThisRepo\\UserData"
 }
 ```

@@ -1,6 +1,7 @@
 from selenium import webdriver
 
 from get_video_info import get_video_info
+from video_controls import *
 import pandas as pd
 import json
 
@@ -21,7 +22,13 @@ def create_driver(config_path=""):
         options.add_argument("user-data-dir=" + config['user_data'])
 
     driver = webdriver.Chrome(options = options)
+
+    try:
+        youtube_login(driver, config['username'], config['password'] )
+    except:
+        pass
     return driver
+    
 
 
 if __name__ == "__main__":
@@ -33,6 +40,7 @@ if __name__ == "__main__":
     ]
 
     driver = create_driver("config.json")
+
     data: list = []
 
     for url in url_list:
