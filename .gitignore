@@ -1,1 +1,5 @@
 keys.py
+*.csv
+/__pycache__
+/chromedriver_win32
+*.exe

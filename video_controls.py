@@ -22,7 +22,10 @@ def pause_video(driver: webdriver.Chrome):
     status: str = play_button.get_attribute("data-title-no-tooltip")
 
     if status == "Pause":
-        play_button.send_keys("k")
+        try:
+            play_button.send_keys("k")
+        except Exception as e:
+            pass
 
 
 def play_video(driver: webdriver.Chrome):
