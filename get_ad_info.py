@@ -69,8 +69,9 @@ def get_why_this_ad_info(driver: webdriver.Chrome) -> list:
         )
         info_button.click()
         iframe = driver.find_element(By.ID, "iframe")
-        driver.switch_to.frame(iframe)
-        reasons = driver.find_elements(By.CSS_SELECTOR, ".Xkwrgc")
+        driver.switch_to.frame(iframe) 
+        # reasons = driver.find_elements(By.CSS_SELECTOR, ".Xkwrgc")
+        reasons = driver.find_elements(By.CSS_SELECTOR, ".zpMl8e-C2o4Ve-wPzPJb-xPjCTc-ibnC6b")
         reasons = [element.text for element in reasons]  # type: ignore[misc]
         exit_button = driver.find_element(
             By.CSS_SELECTOR, ".VfPpkd-Bz112c-LgbsSe.yHy1rc.eT1oJ.mN1ivc.YJBIwf"
