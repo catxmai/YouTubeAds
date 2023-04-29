@@ -8,16 +8,6 @@ from selenium.webdriver.common.keys import Keys
 
 
 def pause_video(driver: webdriver.Chrome):
-    """
-    Parameters
-    ----------
-    driver: a selenium webdriver object (should be pointed at a YouTube video)
-
-    Returns
-    -------
-    reasons: list of reasons youtube provides for why the ad was served to the user
-
-    """
 
     play_button = driver.find_element(
         By.CSS_SELECTOR, "button.ytp-play-button.ytp-button"
@@ -32,16 +22,6 @@ def pause_video(driver: webdriver.Chrome):
 
 
 def play_video(driver: webdriver.Chrome):
-    """
-    Parameters
-    ----------
-    driver: a selenium webdriver object (should be pointed at a YouTube video)
-
-    Returns
-    -------
-    reasons: list of reasons youtube provides for why the ad was served to the user
-
-    """
 
     play_button = driver.find_element(
         By.CSS_SELECTOR, "button.ytp-play-button.ytp-button"
@@ -53,35 +33,16 @@ def play_video(driver: webdriver.Chrome):
 
 
 def skip_ad(driver: webdriver.Chrome):
-    """
-    Parameters
-    ----------
-    driver: a selenium webdriver object (should be pointed at a YouTube video)
 
-    Returns
-    -------
-    reasons: list of reasons youtube provides for why the ad was served to the user
-
-    """
-
-    WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.ytp-ad-skip-button-container.ytp-button')))
+    # WebDriverWait(driver, 2).until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.ytp-ad-skip-button.ytp-button')))
     skip_button = driver.find_element(
-        By.CSS_SELECTOR, 'button.ytp-ad-skip-button-container.ytp-button'
+        By.CSS_SELECTOR, 'button.ytp-ad-skip-button.ytp-button'
     )
     skip_button.click()
 
 
 def wait_for_ad(driver: webdriver.Chrome):
-    """
-    Parameters
-    ----------
-    driver: a selenium webdriver object (should be pointed at a YouTube video)
 
-    Returns
-    -------
-    None
-
-    """
     time_left_element = driver.find_element(
         By.CSS_SELECTOR, "span.ytp-ad-duration-remaining > div.ytp-ad-text"
     )
@@ -93,24 +54,3 @@ def wait_for_ad(driver: webdriver.Chrome):
     play_video(driver)
     time.sleep(time_left + 1)
 
-def youtube_login(driver: webdriver.Chrome, username, password):
-
-    signinurl = "https://accounts.google.com/signin/v2/identifier?service=youtube"
-    driver.get(signinurl)
-
-    uEntry = driver.find_element("id","identifierId")
-    uEntry.clear()
-    uEntry.send_keys(username)
-
-    nextButton = driver.find_element('xpath','//span[text()="Next"]')
-    nextButton = nextButton.find_element('xpath','./..')
-    nextButton.click()
-
-    WebDriverWait(driver, 4).until(EC.presence_of_element_located(('id', 'password')))
-    pEntry = driver.find_element('id',"password")
-    pEntry = pEntry.find_element('xpath','.//input[@type="password"]')
-    pEntry.clear()
-    pEntry.send_keys(password)
-    time.sleep(1)
-    pEntry.send_keys(Keys.RETURN)
-    time.sleep(2)

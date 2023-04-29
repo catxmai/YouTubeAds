@@ -57,35 +57,41 @@ def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
 
         preroll_data.append(preroll_ad_1)
 
-        number_of_ads_left = get_ad_info.get_number_of_ads_left(driver)
-        if number_of_ads_left == 1:
-            preroll_ad_2: Dict[str, str] = {}
-            wait_for_ad(driver)
-            play_video(driver)
-            time.sleep(2)
-            pause_video(driver)
-            preroll_ad_2["ad_id"] = get_ad_info.get_ad_id(driver)
-            preroll_ad_2["why_info"] = str(
-                get_ad_info.get_why_this_ad_info(driver)
-            )  # Warn: list to str conversion
-            preroll_ad_2["ad_url"] = get_ad_info.get_preroll_advertiser_url(
-                driver
-            )
-            preroll_data.append(preroll_ad_2)
+        # Skipping this part since watching in entirety the first ad will skip the second ad
+
+        # number_of_ads_left = get_ad_info.get_number_of_ads_left(driver)
+
+        # if number_of_ads_left == 1:
+        #     preroll_ad_2: Dict[str, str] = {}
+        #     wait_for_ad(driver)
+        #     play_video(driver)
+        #     time.sleep(2)
+        #     pause_video(driver)
+        #     preroll_ad_2["ad_id"] = get_ad_info.get_ad_id(driver)
+        #     preroll_ad_2["why_info"] = str(
+        #         get_ad_info.get_why_this_ad_info(driver)
+        #     )  # Warn: list to str conversion
+        #     preroll_ad_2["ad_url"] = get_ad_info.get_preroll_advertiser_url(
+        #         driver
+        #     )
+        #     preroll_data.append(preroll_ad_2)
 
         video_data["preroll_data"] = str(
             preroll_data
         )  # Warn: list to str conversion
 
-        if get_ad_info.is_skippable(driver):
+        # if get_ad_info.is_skippable(driver):
+
+        try:
             play_video(driver)
             # wait 5 seconds for ad to become skippable
             time.sleep(6)
             skip_ad(driver)
             # wait 1 second for main video to load
             time.sleep(1)
-        else:
-            wait_for_ad(driver)
+        except:
+            pass
+            # wait_for_ad(driver)
 
         pause_video(driver)
 
