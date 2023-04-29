@@ -97,14 +97,14 @@ def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
 
     video_data["is_paid_promotion"] = check_sponsor_info(driver)
 
-    video_data["sparkles_ad_present"] = "False"
-    video_data["sparkles_ad_info"] = ""
-    video_data["sparkles_url"] = ""
+    video_data["side_ad_present"] = "False"
+    video_data["side_ad_info"] = ""
+    video_data["side_ad_url"] = ""
 
-    if check_for_sparkles_ad(driver):
-        video_data["sparkles_ad_present"] = "True"
-        video_data["sparkles_ad_info"] = get_sparkles_info(driver)
-        video_data["sparkles_url"] = get_sparkles_ad_url(driver)
+    if check_for_side_ad(driver):
+        video_data["side_ad_present"] = "True"
+        video_data["side_ad_info"] = get_side_ad_info(driver)
+        video_data["side_ad_url"] = get_side_ad_url(driver)
 
     video_data["promoted_video_present"] = "False"
     video_data["promoted_video_info"] = ""

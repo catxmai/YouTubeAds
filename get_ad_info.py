@@ -240,7 +240,7 @@ def is_skippable(driver: webdriver.Chrome) -> bool:
     return is_skippable
 
 
-def check_for_sparkles_ad(driver: webdriver.Chrome) -> bool:
+def check_for_side_ad(driver: webdriver.Chrome) -> bool:
     """
     Parameters
     ----------
@@ -248,17 +248,17 @@ def check_for_sparkles_ad(driver: webdriver.Chrome) -> bool:
 
     Returns
     -------
-    sparkles_present: a bool indicating the presence of a "sparkles" ad
+    side_ad_present: a bool indicating the presence of a "sparkles" ad
 
     """
 
-    sparkles_present: bool = False
+    side_ad_present: bool = False
     try:
         element = driver.find_element(By.CSS_SELECTOR, "#sparkles-container")
-        sparkles_present = True
+        side_ad_present = True
     except NoSuchElementException:
         pass
-    return sparkles_present
+    return side_ad_present
 
 
 def check_for_promoted_video(driver: webdriver.Chrome) -> bool:
@@ -345,7 +345,7 @@ def get_promoted_video_id(driver: webdriver.Chrome) -> str:
     return video_id
 
 
-def get_sparkles_info(driver: webdriver.Chrome) -> list:
+def get_side_ad_info(driver: webdriver.Chrome) -> list:
     """
     Parameters
     ----------
@@ -380,7 +380,7 @@ def get_sparkles_info(driver: webdriver.Chrome) -> list:
     return reasons
 
 
-def get_sparkles_ad_url(driver: webdriver.Chrome) -> str:
+def get_side_ad_url(driver: webdriver.Chrome) -> str:
     """
     Parameters
     ----------
