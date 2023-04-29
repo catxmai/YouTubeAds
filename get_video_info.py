@@ -8,7 +8,7 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import *
 
 import api
-import get_ad_info
+from get_ad_info import *
 from video_controls import *
 
 
@@ -41,19 +41,17 @@ def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
     video_data["context_box_present"] = check_for_context_box(driver)
     video_data["merch_info"] = get_merch_info(driver)
 
-    is_preroll = get_ad_info.check_for_preroll(driver)
+    is_preroll = check_for_preroll(driver)
     video_data["is_preroll"] = str(is_preroll)
 
     video_data["preroll_data"] = ""
 
     if is_preroll:
         preroll_data = []
-        preroll_ad_1: Dict[str, str] = {}
-        preroll_ad_1["ad_id"] = get_ad_info.get_ad_id(driver)
-        preroll_ad_1["why_info"] = str(
-            get_ad_info.get_why_this_ad_info(driver)
-        )  # Warn: list to str conversion
-        preroll_ad_1["ad_url"] = get_ad_info.get_preroll_advertiser_url(driver)
+        preroll_ad_1 = {}
+        preroll_ad_1["ad_id"] = get_ad_id(driver)
+        preroll_ad_1["why_info"] = ''.join(str(reason) for reason in get_why_this_ad_info(driver))
+        preroll_ad_1["ad_url"] = get_preroll_advertiser_url(driver)
 
         preroll_data.append(preroll_ad_1)
 
@@ -78,7 +76,7 @@ def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
 
         video_data["preroll_data"] = str(
             preroll_data
-        )  # Warn: list to str conversion
+        ) 
 
         # if get_ad_info.is_skippable(driver):
 
@@ -103,23 +101,19 @@ def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
     video_data["sparkles_ad_info"] = ""
     video_data["sparkles_url"] = ""
 
-    if get_ad_info.check_for_sparkles_ad(driver):
+    if check_for_sparkles_ad(driver):
         video_data["sparkles_ad_present"] = "True"
-        video_data["sparkles_ad_info"] = get_ad_info.get_sparkles_info(driver)
-        video_data["sparkles_url"] = get_ad_info.get_sparkles_ad_url(driver)
+        video_data["sparkles_ad_info"] = get_sparkles_info(driver)
+        video_data["sparkles_url"] = get_sparkles_ad_url(driver)
 
     video_data["promoted_video_present"] = "False"
     video_data["promoted_video_info"] = ""
     video_data["promoted_video_id"] = ""
 
-    if get_ad_info.check_for_promoted_video(driver):
+    if check_for_promoted_video(driver):
         video_data["promoted_video_present"] = "True"
-        video_data["promoted_video_info"] = get_ad_info.get_promoted_video_info(
-            driver
-        )
-        video_data["promoted_video_id"] = get_ad_info.get_promoted_video_id(
-            driver
-        )
+        video_data["promoted_video_info"] = get_promoted_video_info(driver)
+        video_data["promoted_video_id"] = get_promoted_video_id(driver)
 
     video_data["recommended_videos"] = get_recommended_videos(driver)
 
