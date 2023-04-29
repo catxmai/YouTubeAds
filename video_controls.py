@@ -34,7 +34,8 @@ def play_video(driver: webdriver.Chrome):
 
 def skip_ad(driver: webdriver.Chrome):
 
-    # WebDriverWait(driver, 2).until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.ytp-ad-skip-button.ytp-button')))
+    # wait 5 seconds for ad to become skippable
+    time.sleep(6)
     skip_button = driver.find_element(
         By.CSS_SELECTOR, 'button.ytp-ad-skip-button.ytp-button'
     )

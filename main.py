@@ -14,7 +14,7 @@ if __name__ == "__main__":
 
     driver = create_driver("config.json")
 
-    data: list = []
+    data = []
 
     for url in url_list:
         try:

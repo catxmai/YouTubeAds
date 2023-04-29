@@ -36,24 +36,17 @@ def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
     pause_video(driver)
     video_data = api.get_info(video_id)
 
-    video_data["urls_in_description"] = extract_urls(video_data["description"])
+    # video_data["urls_in_description"] = extract_urls(video_data["description"])
     video_data["comments_disabled"] = check_if_comments_disabled(driver)
     video_data["context_box_present"] = check_for_context_box(driver)
     video_data["merch_info"] = get_merch_info(driver)
 
     is_preroll = check_for_preroll(driver)
-    video_data["is_preroll"] = str(is_preroll)
-
-    video_data["preroll_data"] = ""
 
     if is_preroll:
-        preroll_data = []
-        preroll_ad_1 = {}
-        preroll_ad_1["ad_id"] = get_ad_id(driver)
-        preroll_ad_1["why_info"] = ''.join(str(reason) for reason in get_why_this_ad_info(driver))
-        preroll_ad_1["ad_url"] = get_preroll_advertiser_url(driver)
-
-        preroll_data.append(preroll_ad_1)
+        video_data["preroll_ad_id"] = get_ad_id(driver)
+        video_data["preroll_ad_info"] = get_why_this_ad_info(driver)
+        video_data["preroll_ad_url"] = get_preroll_advertiser_url(driver)
 
         # Skipping this part since watching in entirety the first ad will skip the second ad
 
@@ -74,22 +67,12 @@ def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
         #     )
         #     preroll_data.append(preroll_ad_2)
 
-        video_data["preroll_data"] = str(
-            preroll_data
-        ) 
-
-        # if get_ad_info.is_skippable(driver):
-
         try:
             play_video(driver)
-            # wait 5 seconds for ad to become skippable
-            time.sleep(6)
             skip_ad(driver)
-            # wait 1 second for main video to load
             time.sleep(1)
         except:
             pass
-            # wait_for_ad(driver)
 
         pause_video(driver)
 
@@ -97,23 +80,18 @@ def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
 
     video_data["is_paid_promotion"] = check_sponsor_info(driver)
 
-    video_data["side_ad_present"] = "False"
-    video_data["side_ad_info"] = ""
-    video_data["side_ad_url"] = ""
+    try:
+        video_data["side_ad_info"] = get_side_ad_info(driver) 
+        video_data["side_ad_url"] = get_side_ad_url(driver) 
+    except:
+        pass
 
-    if check_for_side_ad(driver):
-        video_data["side_ad_present"] = "True"
-        video_data["side_ad_info"] = get_side_ad_info(driver)
-        video_data["side_ad_url"] = get_side_ad_url(driver)
 
-    video_data["promoted_video_present"] = "False"
-    video_data["promoted_video_info"] = ""
-    video_data["promoted_video_id"] = ""
-
-    if check_for_promoted_video(driver):
-        video_data["promoted_video_present"] = "True"
+    try:
         video_data["promoted_video_info"] = get_promoted_video_info(driver)
         video_data["promoted_video_id"] = get_promoted_video_id(driver)
+    except:
+        pass
 
     video_data["recommended_videos"] = get_recommended_videos(driver)
 
@@ -132,10 +110,10 @@ def get_video_id(driver: webdriver.Chrome) -> str:
 
     """
 
-    video_id: str = ""
-    url: str = driver.current_url
-    pattern: str = r"^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*"
-    match: Any = re.match(pattern, url)
+    video_id = ""
+    url = driver.current_url
+    pattern = r"^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*"
+    match = re.match(pattern, url)
 
     if match and len(match[7]) == 11:
         video_id = match[7]
@@ -206,7 +184,7 @@ def get_merch_info(driver: webdriver.Chrome) -> str:
 
     """
 
-    url: str = ""
+    url = ""
     try:
         merch_shelf = driver.find_element(
             By.CSS_SELECTOR,
