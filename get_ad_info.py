@@ -7,7 +7,7 @@ from selenium.common.exceptions import *
 from selenium.webdriver import ActionChains
 
 
-def check_for_banner(driver: webdriver.Chrome) -> bool:
+def check_for_banner_ad(driver: webdriver.Chrome) -> bool:
     """
     Parameters
     ----------
@@ -28,7 +28,7 @@ def check_for_banner(driver: webdriver.Chrome) -> bool:
     return banner_present
 
 
-def check_for_preroll(driver: webdriver.Chrome) -> bool:
+def check_for_preroll_ad(driver: webdriver.Chrome) -> bool:
     """
     Parameters
     ----------
@@ -49,7 +49,7 @@ def check_for_preroll(driver: webdriver.Chrome) -> bool:
     return preroll_present
 
 
-def get_why_this_ad_info(driver: webdriver.Chrome) -> list:
+def get_preroll_ad_info(driver: webdriver.Chrome) -> list:
     """
     Parameters
     ----------
@@ -87,7 +87,7 @@ def get_why_this_ad_info(driver: webdriver.Chrome) -> list:
     return reasons
 
 
-def get_ad_id(driver: webdriver.Chrome) -> str:
+def get_preroll_ad_id(driver: webdriver.Chrome) -> str:
     """
     Parameters
     ----------
@@ -127,7 +127,7 @@ def get_ad_id(driver: webdriver.Chrome) -> str:
     return ad_id
 
 
-def get_preroll_advertiser_url(driver: webdriver.Chrome) -> str:
+def get_preroll_ad_url(driver: webdriver.Chrome) -> str:
     """
     Parameters
     ----------
@@ -161,8 +161,75 @@ def get_preroll_advertiser_url(driver: webdriver.Chrome) -> str:
 
     return url
 
+def get_side_ad_info(driver: webdriver.Chrome) -> list:
+    """
+    Parameters
+    ----------
+    driver: a selenium webdriver object (should be pointed at a YouTube video)
 
-def get_banner_advertiser(driver: webdriver.Chrome) -> str:
+    Returns
+    -------
+    reasons: list of reasons youtube provides for why the ad was served to the user
+
+    """
+
+    menu_button = driver.find_element(
+        By.CSS_SELECTOR,
+        ".style-scope.ytd-promoted-sparkles-web-renderer > yt-icon-button > button",
+    )
+    menu_button.click()
+    info_button = driver.find_element(
+        By.CSS_SELECTOR,
+        "#items > ytd-menu-navigation-item-renderer.style-scope.ytd-menu-popup-renderer.iron-selected > a > tp-yt-paper-item",
+    )
+    info_button.click()
+    iframe = driver.find_element(By.ID, "iframe")
+    driver.switch_to.frame(iframe)
+    reasons = driver.find_elements(By.CLASS_NAME, "zpMl8e-C2o4Ve-wPzPJb-xPjCTc-ibnC6b")
+    reasons = [element.get_attribute('innerHTML') for element in reasons]  
+    exit_button = driver.find_element(
+        By.CSS_SELECTOR, ".VfPpkd-Bz112c-LgbsSe.yHy1rc.eT1oJ.mN1ivc.YJBIwf"
+    )
+    exit_button.click()
+    driver.switch_to.default_content()
+
+    return reasons
+
+
+def get_side_ad_url(driver: webdriver.Chrome) -> str:
+    """
+    Parameters
+    ----------
+    driver: a selenium webdriver object (should be pointed at a YouTube video)
+
+    Returns
+    -------
+    url: url linked to by the "sparkles" advertisement
+
+    """
+
+    element = driver.find_element(
+        By.CSS_SELECTOR,
+        ".style-scope.ytd-promoted-sparkles-web-renderer > yt-button-shape > button",
+    )
+
+    element.click()
+
+    # save current tab and switch chromedriver's focus to the new tab
+    video_tab = driver.current_window_handle
+    tabs_open = driver.window_handles
+    driver.switch_to.window(tabs_open[1])
+
+    # wait 5 secs to account for possible redirects
+    time.sleep(5)
+    url: str = driver.current_url
+    driver.close()
+    driver.switch_to.window(video_tab)
+
+    return url
+
+
+def get_banner_ad_url(driver: webdriver.Chrome) -> str:
     """
     Parameters
     ----------
@@ -345,69 +412,4 @@ def get_promoted_video_id(driver: webdriver.Chrome) -> str:
     return video_id
 
 
-def get_side_ad_info(driver: webdriver.Chrome) -> list:
-    """
-    Parameters
-    ----------
-    driver: a selenium webdriver object (should be pointed at a YouTube video)
 
-    Returns
-    -------
-    reasons: list of reasons youtube provides for why the ad was served to the user
-
-    """
-
-    menu_button = driver.find_element(
-        By.CSS_SELECTOR,
-        ".style-scope.ytd-promoted-sparkles-web-renderer > yt-icon-button > button",
-    )
-    menu_button.click()
-    info_button = driver.find_element(
-        By.CSS_SELECTOR,
-        "#items > ytd-menu-navigation-item-renderer.style-scope.ytd-menu-popup-renderer.iron-selected > a > tp-yt-paper-item",
-    )
-    info_button.click()
-    iframe = driver.find_element(By.ID, "iframe")
-    driver.switch_to.frame(iframe)
-    reasons = driver.find_elements(By.CLASS_NAME, "zpMl8e-C2o4Ve-wPzPJb-xPjCTc-ibnC6b")
-    reasons = [element.get_attribute('innerHTML') for element in reasons]  
-    exit_button = driver.find_element(
-        By.CSS_SELECTOR, ".VfPpkd-Bz112c-LgbsSe.yHy1rc.eT1oJ.mN1ivc.YJBIwf"
-    )
-    exit_button.click()
-    driver.switch_to.default_content()
-
-    return reasons
-
-
-def get_side_ad_url(driver: webdriver.Chrome) -> str:
-    """
-    Parameters
-    ----------
-    driver: a selenium webdriver object (should be pointed at a YouTube video)
-
-    Returns
-    -------
-    url: url linked to by the "sparkles" advertisement
-
-    """
-
-    element = driver.find_element(
-        By.CSS_SELECTOR,
-        ".style-scope.ytd-promoted-sparkles-web-renderer > yt-button-shape > button",
-    )
-
-    element.click()
-
-    # save current tab and switch chromedriver's focus to the new tab
-    video_tab = driver.current_window_handle
-    tabs_open = driver.window_handles
-    driver.switch_to.window(tabs_open[1])
-
-    # wait 5 secs to account for possible redirects
-    time.sleep(5)
-    url: str = driver.current_url
-    driver.close()
-    driver.switch_to.window(video_tab)
-
-    return url

@@ -35,18 +35,16 @@ def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
     time.sleep(2)
     pause_video(driver)
     video_data = api.get_info(video_id)
-
-    # video_data["urls_in_description"] = extract_urls(video_data["description"])
     video_data["comments_disabled"] = check_if_comments_disabled(driver)
     video_data["context_box_present"] = check_for_context_box(driver)
     video_data["merch_info"] = get_merch_info(driver)
 
-    is_preroll = check_for_preroll(driver)
+    is_preroll = check_for_preroll_ad(driver)
 
     if is_preroll:
-        video_data["preroll_ad_id"] = get_ad_id(driver)
-        video_data["preroll_ad_info"] = get_why_this_ad_info(driver)
-        video_data["preroll_ad_url"] = get_preroll_advertiser_url(driver)
+        video_data["preroll_ad_id"] = get_preroll_ad_id(driver)
+        video_data["preroll_ad_info"] = get_preroll_ad_info(driver)
+        video_data["preroll_ad_url"] = get_preroll_ad_url(driver)
 
         # Skipping this part since watching in entirety the first ad will skip the second ad
 
@@ -92,8 +90,6 @@ def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
         video_data["promoted_video_id"] = get_promoted_video_id(driver)
     except:
         pass
-
-    video_data["recommended_videos"] = get_recommended_videos(driver)
 
     return video_data
 
@@ -209,9 +205,6 @@ def get_merch_info(driver: webdriver.Chrome) -> str:
 
     return url
 
-
-def get_recommended_videos(driver):
-    pass
 
 
 def check_sponsor_info(driver: webdriver.Chrome) -> bool:
