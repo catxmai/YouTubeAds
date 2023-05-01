@@ -40,7 +40,7 @@ def check_for_preroll_ad(driver: webdriver.Chrome) -> bool:
 
     """
 
-    preroll_present: bool = False
+    preroll_present = False
     try:
         element = driver.find_element(By.CSS_SELECTOR, ".ytp-ad-text")
         preroll_present = True
@@ -141,7 +141,7 @@ def get_preroll_ad_url(driver: webdriver.Chrome) -> str:
 
     element = driver.find_element(
         By.CSS_SELECTOR,
-        "button.ytp-ad-button.ytp-ad-visit-advertiser-button.ytp-ad-button-link",
+        "button.ytp-ad-button.ytp-ad-visit-advertiser-button.ytp-ad-button-link"
     )
 
     element.click()
@@ -172,21 +172,23 @@ def get_side_ad_info(driver: webdriver.Chrome) -> list:
     reasons: list of reasons youtube provides for why the ad was served to the user
 
     """
-
     menu_button = driver.find_element(
         By.CSS_SELECTOR,
         ".style-scope.ytd-promoted-sparkles-web-renderer > yt-icon-button > button",
     )
-    menu_button.click()
+    driver.execute_script("arguments[0].click();", menu_button)
+
     info_button = driver.find_element(
         By.CSS_SELECTOR,
         "#items > ytd-menu-navigation-item-renderer.style-scope.ytd-menu-popup-renderer.iron-selected > a > tp-yt-paper-item",
     )
+
     info_button.click()
     iframe = driver.find_element(By.ID, "iframe")
     driver.switch_to.frame(iframe)
     reasons = driver.find_elements(By.CLASS_NAME, "zpMl8e-C2o4Ve-wPzPJb-xPjCTc-ibnC6b")
     reasons = [element.get_attribute('innerHTML') for element in reasons]  
+    print(reasons)
     exit_button = driver.find_element(
         By.CSS_SELECTOR, ".VfPpkd-Bz112c-LgbsSe.yHy1rc.eT1oJ.mN1ivc.YJBIwf"
     )
@@ -210,7 +212,7 @@ def get_side_ad_url(driver: webdriver.Chrome) -> str:
 
     element = driver.find_element(
         By.CSS_SELECTOR,
-        ".style-scope.ytd-promoted-sparkles-web-renderer > yt-button-shape > button",
+        ".style-scope.ytd-promoted-sparkles-web-renderer > yt-button-shape > button"
     )
 
     element.click()
@@ -318,8 +320,7 @@ def check_for_side_ad(driver: webdriver.Chrome) -> bool:
     side_ad_present: a bool indicating the presence of a "sparkles" ad
 
     """
-
-    side_ad_present: bool = False
+    side_ad_present = False
     try:
         element = driver.find_element(By.CSS_SELECTOR, "#sparkles-container")
         side_ad_present = True
