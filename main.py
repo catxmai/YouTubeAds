@@ -15,10 +15,10 @@ if __name__ == "__main__":
     # df.drop_duplicates(inplace=True)
 
     url_list = [
-        "https://www.youtube.com/watch?v="+ i for i in df['videoid'][143:]
+        "https://www.youtube.com/watch?v="+ i for i in df['videoid'][143:243]
     ]
 
-    driver = create_driver("config.json")
+    driver = create_driver("config.json", headless=True)
 
     data = []
 

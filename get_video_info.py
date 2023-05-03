@@ -187,7 +187,7 @@ def get_channel_id(driver):
 
 
 def get_comment_count(driver):
-    # Get number of comments
+    # Comment count is not searchable in html element if don't scroll down
     # Returns -1 if can't get comment count
     SCROLL_PAUSE_TIME = .5
 

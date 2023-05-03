@@ -8,7 +8,7 @@ import json
 import time
 import datetime
 
-def create_driver(config_path=""):
+def create_driver(config_path="", headless=True):
     # config is a json file
     if config_path:
         config = {}
@@ -21,6 +21,8 @@ def create_driver(config_path=""):
     options = webdriver.ChromeOptions()
     options.add_argument("--window-size=1540,1080")
     options.add_argument("--no-sandbox")
+    if headless:
+        options.add_argument("--headless")
     if config['user_data']:
         options.add_argument("user-data-dir=" + config['user_data'])
 
