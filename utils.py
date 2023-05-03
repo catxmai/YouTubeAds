@@ -6,6 +6,7 @@ from selenium.webdriver.common.keys import Keys
 
 import json
 import time
+import datetime
 
 def create_driver(config_path=""):
     # config is a json file
@@ -80,3 +81,12 @@ def extract_urls(text: str) -> list:
     urls: list = [match.group() for match in matches]
 
     return urls
+
+
+def get_test_id():
+    # Generates an id for scraping run based on system time
+    d = datetime.datetime.now()
+    test_str = '{date:%Y%m%d_%H%M}'.format(date = d)
+    test_id = int('{date:%Y%m%d%H%M%S}'.format(date = d))
+
+    return test_id, test_str

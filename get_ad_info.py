@@ -28,6 +28,21 @@ def check_for_banner_ad(driver: webdriver.Chrome) -> bool:
     return banner_present
 
 
+def get_reasons(driver: webdriver.Chrome) -> list:
+    try:
+        google_info = driver.find_elements(By.CLASS_NAME, "QVfAMd-wPzPJb-xPjCTc-ibnC6b")
+        google_info = [element.get_attribute('textContent') for element in google_info]
+    except NoSuchElementException:
+        google_info = []
+    try:
+        other_info = driver.find_elements(By.CLASS_NAME, "zpMl8e-C2o4Ve-wPzPJb-xPjCTc-ibnC6b")
+        other_info = [element.get_attribute('innerHTML') for element in other_info] 
+    except NoSuchElementException:
+        other_info = []
+    
+    return google_info + other_info
+
+
 def check_for_preroll_ad(driver: webdriver.Chrome) -> bool:
     """
     Parameters
@@ -73,8 +88,7 @@ def get_preroll_ad_info(driver: webdriver.Chrome) -> list:
 
         # Why this ad reasons are stored as <li> with the same class name under a generic unclassed <ul> 
 
-        reasons = driver.find_elements(By.CLASS_NAME, "zpMl8e-C2o4Ve-wPzPJb-xPjCTc-ibnC6b")
-        reasons = [element.get_attribute('innerHTML') for element in reasons]  
+        reasons = get_reasons(driver)
         exit_button = driver.find_element(
             By.CSS_SELECTOR, ".VfPpkd-Bz112c-LgbsSe.yHy1rc.eT1oJ.mN1ivc.YJBIwf"
         )
@@ -186,8 +200,7 @@ def get_side_ad_info(driver: webdriver.Chrome) -> list:
     info_button.click()
     iframe = driver.find_element(By.ID, "iframe")
     driver.switch_to.frame(iframe)
-    reasons = driver.find_elements(By.CLASS_NAME, "zpMl8e-C2o4Ve-wPzPJb-xPjCTc-ibnC6b")
-    reasons = [element.get_attribute('innerHTML') for element in reasons]  
+    reasons = get_reasons(driver)
     exit_button = driver.find_element(
         By.CSS_SELECTOR, ".VfPpkd-Bz112c-LgbsSe.yHy1rc.eT1oJ.mN1ivc.YJBIwf"
     )
@@ -377,8 +390,7 @@ def get_promoted_video_info(driver: webdriver.Chrome) -> list:
     info_button.click()
     iframe = driver.find_element(By.ID, "iframe")
     driver.switch_to.frame(iframe)
-    reasons = driver.find_elements(By.CLASS_NAME, "zpMl8e-C2o4Ve-wPzPJb-xPjCTc-ibnC6b")
-    reasons = [element.get_attribute('innerHTML') for element in reasons]  
+    reasons = get_reasons(driver)
     exit_button = driver.find_element(
         By.CSS_SELECTOR, ".VfPpkd-Bz112c-LgbsSe.yHy1rc.eT1oJ.mN1ivc.YJBIwf"
     )

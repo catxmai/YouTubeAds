@@ -123,6 +123,7 @@ def load_script_tag(driver: webdriver.Chrome):
     # loads a web element with id = "scriptTag" that contains a lot of useful info
     global SCRIPT_TAG
     try:
+        time.sleep(3)
         SCRIPT_TAG = json.loads(driver.find_element(By.ID, "scriptTag").get_attribute("innerHTML"))
     except AttributeError:
         pass
