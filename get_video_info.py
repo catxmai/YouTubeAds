@@ -1,6 +1,8 @@
 import logging
 import re
 import time
+import datetime
+import json
 from typing import Any, Dict
 
 from selenium import webdriver
@@ -10,9 +12,10 @@ from selenium.common.exceptions import *
 import api
 from get_ad_info import *
 from video_controls import *
+from utils import *
 
 
-def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
+def get_video_info(video_url, driver: webdriver.Chrome, use_api = False) -> dict:
     """
     Parameters
     ----------
@@ -34,9 +37,21 @@ def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
     play_video(driver)
     time.sleep(2)
     pause_video(driver)
-    video_data = api.get_info(video_id)
-    video_data["video_id"] = video_id
-    video_data["video_url"] = "https://www.youtube.com/watch?v=" + video_id
+    if use_api:
+        video_data = api.get_info(video_id)
+    else:
+        video_data = {}
+        video_data["video_id"] = video_id
+        video_data["video_title"] = get_video_title(driver)
+        video_data["video_url"] = "https://www.youtube.com/watch?v=" + video_id
+        video_data["channel_id"], video_data["channel_name"] = get_channel_info(driver)
+        video_data["video_description"] = get_video_description(driver)
+        video_data["date_uploaded"], _ = get_upload_date(driver)
+        video_data["likes"] = get_likes(driver)
+        video_data["views"] = get_views(driver)
+        video_data["comment_count"] = get_comment_count(driver)
+        
+        
     video_data["comments_disabled"] = check_if_comments_disabled(driver)
     video_data["context_box_present"] = check_for_context_box(driver)
     video_data["merch_info"] = get_merch_info(driver)
@@ -78,11 +93,8 @@ def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
 
         pause_video(driver)
 
-    # check for banner ads
-
     video_data["is_paid_promotion"] = check_sponsor_info(driver)
 
-    print(check_for_side_ad(driver))
     try:
         video_data["side_ad_info"] = get_side_ad_info(driver) 
         video_data["side_ad_url"] = get_side_ad_url(driver) 
@@ -119,9 +131,118 @@ def get_video_id(driver: webdriver.Chrome) -> str:
     if match and len(match[7]) == 11:
         video_id = match[7]
     else:
-        logging.error("Error unable to extract video id")
+        # logging.error("Error unable to extract video id")
+        video_id = -1
 
     return video_id
+
+
+
+def get_video_title(driver: webdriver.Chrome) -> str:
+    # Get video title
+    return driver.find_element(By.XPATH, '//yt-formatted-string[@class="style-scope ytd-video-primary-info-renderer"]').text
+
+
+def get_views(driver):
+    # Get number of views
+    # Returns -1 if we cant find the view count
+    try:
+        container = driver.find_element(By.XPATH, '//span[@class="view-count style-scope ytd-video-view-count-renderer"]')
+        views = int("".join(list(filter(str.isdigit, container.text))))
+    except:
+        return -1
+
+    return views
+
+
+def get_channel_info(driver):
+    container = driver.find_element(By.XPATH, '//ytd-channel-name[@id="channel-name"]')
+    channel = container.find_element(By.XPATH, './/a[@class="yt-simple-endpoint style-scope yt-formatted-string"]')
+
+    link = channel.get_attribute('href')
+    link = remove_prefix(link, 'https://www.youtube.com')
+
+    if '/channel/' not in link:
+        ID = link
+    else:
+        ID = remove_prefix(link, '/channel/')
+
+    return ID, channel.text
+
+
+def get_video_description(driver):
+    try:
+        description_container = driver.find_element(By.ID, "scriptTag")
+        descr = json.loads(description_container.get_attribute("innerHTML"))
+        descr = descr['description']
+
+    except AttributeError:
+        return "-1"
+
+    return descr
+
+
+def get_comment_count(driver):
+    # Get number of comments
+    # Returns -1 if can't get comment count
+    SCROLL_PAUSE_TIME = .5
+
+    last_height = driver.execute_script("return document.documentElement.scrollHeight")
+    found = False
+    container = None
+
+    # Sometimes need to scroll page to get comment section to load
+    count = 0
+    while not found:
+        try:
+            container = driver.find_element(By.XPATH, '//yt-formatted-string[@class="count-text style-scope ytd-comments-header-renderer"]')
+            found = True
+        except:
+            found = False
+
+        if not found:
+            driver.execute_script("window.scrollTo(0, " + str(last_height/4) + ");")
+            time.sleep(SCROLL_PAUSE_TIME)
+
+            # Calculate new scroll height and compare with last scroll height
+            new_height = driver.execute_script("return document.documentElement.scrollHeight") 
+
+            if (new_height == last_height) and count > 3:
+                driver.execute_script("window.scrollTo(0, 0);")
+                return -1
+            last_height = new_height
+
+        count += 1
+
+
+    try:
+        comment_count = int("".join(list(filter(str.isdigit, container.text))))
+    except:
+        comment_count = -1
+
+    driver.execute_script("window.scrollTo(0, 0);")
+
+    return comment_count
+
+
+def get_upload_date(driver):
+    # Get date uploaded
+    # Returns date as string and timestamp
+    container = driver.find_element(By.XPATH, '//div[@id="info-strings"]')
+    date = container.find_element(By.XPATH,'.//yt-formatted-string[@class="style-scope ytd-video-primary-info-renderer"]').text
+
+    pattern = "(Jan(uary)?|Feb(ruary)?|Mar(ch)?|Apr(il)?|May|Jun(e)?|Jul(y)?|Aug(ust)?|Sep(tember)?|Oct(ober)?|Nov(ember)?|Dec(ember)?) \d{1,2}, \d{4}"
+    
+    search = re.search(pattern, date)
+    if search is not None:
+        date = search.group()
+
+    try:
+        date_time_object = datetime.datetime.strptime(date, '%b %d, %Y')
+    except: 
+        return date, datetime.datetime(1990,1,1).timestamp()
+    
+    return date, int(date_time_object.timestamp())
 
 
 def check_if_comments_disabled(driver: webdriver.Chrome) -> bool:
@@ -154,23 +275,20 @@ def check_if_comments_disabled(driver: webdriver.Chrome) -> bool:
     return is_disabled
 
 
-def extract_urls(text: str) -> list:
-    """
-    Parameters
-    ----------
-    text: a string to be parsed for urls
+def get_likes(driver):
 
-    Returns
-    -------
-    urls: a list of urls extracted from the input string
+    like_count = -1
 
-    """
+    # Like button aria-label is e.g. "like this video along with 282,068 other people"
+    like_button_container = driver.find_element(
+        By.CSS_SELECTOR, "#segmented-like-button > ytd-toggle-button-renderer > yt-button-shape > button")
 
-    pattern: str = r"[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)"
-    matches: Any = re.finditer(pattern, text)
-    urls: list = [match.group() for match in matches]
+    aria_label = like_button_container.get_attribute('aria-label')
+    aria_label = aria_label.replace(',', '')
+    like_count = int(re.findall('\d+', aria_label)[0])
 
-    return urls
+    return like_count
+
 
 
 def get_merch_info(driver: webdriver.Chrome) -> str:

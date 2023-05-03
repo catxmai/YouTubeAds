@@ -53,3 +53,30 @@ def youtube_login(driver: webdriver.Chrome, username, password):
     time.sleep(1)
     pEntry.send_keys(Keys.RETURN)
     time.sleep(2)
+
+def remove_prefix(instr, prefix):
+    # Remove a substr from the start of a string
+    # Returns new string without prefix
+    if instr.startswith(prefix):
+        return instr[len(prefix):]
+    else:
+        return instr[:]
+
+
+def extract_urls(text: str) -> list:
+    """
+    Parameters
+    ----------
+    text: a string to be parsed for urls
+
+    Returns
+    -------
+    urls: a list of urls extracted from the input string
+
+    """
+
+    pattern: str = r"[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)"
+    matches: Any = re.finditer(pattern, text)
+    urls: list = [match.group() for match in matches]
+
+    return urls

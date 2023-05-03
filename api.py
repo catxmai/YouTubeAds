@@ -44,14 +44,15 @@ def get_info(video_id: str) -> Dict[str, Any]:
 
     video_data: Dict[str, Any] = {}
 
+    video_data["video_id"] = video_id
+    video_data["video_title"] = snippet["title"]
+    video_data["video_url"] = "https://www.youtube.com/watch?v=" + video_id
     video_data["channel_name"] = snippet["channelTitle"]
     video_data["channel_id"] = snippet["channelId"]
-    video_data["description"] = snippet["description"]
-    video_data["title"] = snippet["title"]
+    video_data["video_description"] = snippet["description"]
     video_data["date_uploaded"] = snippet["publishedAt"]
-
     video_data["likes"] = int(statistics["likeCount"])
     video_data["views"] = int(statistics["viewCount"])
-    video_data["comments"] = int(statistics["commentCount"])
+    video_data["comment_count"] = int(statistics["commentCount"])
 
     return video_data

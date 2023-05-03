@@ -188,7 +188,6 @@ def get_side_ad_info(driver: webdriver.Chrome) -> list:
     driver.switch_to.frame(iframe)
     reasons = driver.find_elements(By.CLASS_NAME, "zpMl8e-C2o4Ve-wPzPJb-xPjCTc-ibnC6b")
     reasons = [element.get_attribute('innerHTML') for element in reasons]  
-    print(reasons)
     exit_button = driver.find_element(
         By.CSS_SELECTOR, ".VfPpkd-Bz112c-LgbsSe.yHy1rc.eT1oJ.mN1ivc.YJBIwf"
     )
