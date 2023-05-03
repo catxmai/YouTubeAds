@@ -42,19 +42,18 @@ def get_video_info(video_url, driver: webdriver.Chrome, use_api = False) -> dict
     else:
         video_data = {}
         video_data["video_id"] = video_id
-        video_data["video_title"] = get_video_title(driver)
+        load_script_tag(driver)
+        video_data["video_title"] = get_video_title()
         video_data["video_url"] = "https://www.youtube.com/watch?v=" + video_id
-        video_data["channel_id"], video_data["channel_name"] = get_channel_info(driver)
-        video_data["video_description"] = get_video_description(driver)
-        video_data["date_uploaded"], _ = get_upload_date(driver)
+        video_data["channel_name"] = get_channel_name()
+        video_data["channel_id"] = get_channel_id(driver)
+        video_data["video_description"] = get_video_description()
+        video_data["date_uploaded"] = get_upload_date()
         video_data["likes"] = get_likes(driver)
-        video_data["views"] = get_views(driver)
+        video_data["views"] = get_views()
         video_data["comment_count"] = get_comment_count(driver)
         
-        
-    video_data["comments_disabled"] = check_if_comments_disabled(driver)
-    video_data["context_box_present"] = check_for_context_box(driver)
-    video_data["merch_info"] = get_merch_info(driver)
+    video_data["video_genre"] = get_video_genre()
 
     is_preroll = check_for_preroll_ad(driver)
 
@@ -83,7 +82,7 @@ def get_video_info(video_url, driver: webdriver.Chrome, use_api = False) -> dict
         #     )
         #     preroll_data.append(preroll_ad_2)
 
-        #if ad is preroll, try to skip, if not then continue
+    #if ad is preroll, try to skip, if not then continue
         try:
             play_video(driver)
             skip_ad(driver)
@@ -112,74 +111,78 @@ def get_video_info(video_url, driver: webdriver.Chrome, use_api = False) -> dict
 
 
 def get_video_id(driver: webdriver.Chrome) -> str:
-    """
-    Parameters
-    ----------
-    driver: a selenium webdriver object (should be pointed at a YouTube video)
-
-    Returns
-    -------
-    video_id: the id of the current YouTube video
-
-    """
-
-    video_id = ""
     url = driver.current_url
-    pattern = r"^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*"
-    match = re.match(pattern, url)
+    pattern = r"(?<=watch\?v=).{11}" #capture anything with 11-length after watch?v=
+    match = re.search(pattern, url)
 
-    if match and len(match[7]) == 11:
-        video_id = match[7]
-    else:
-        # logging.error("Error unable to extract video id")
-        video_id = -1
+    if match:
+        return match[0]
+    return "-1"
 
-    return video_id
-
-
-
-def get_video_title(driver: webdriver.Chrome) -> str:
-    # Get video title
-    return driver.find_element(By.XPATH, '//yt-formatted-string[@class="style-scope ytd-video-primary-info-renderer"]').text
-
-
-def get_views(driver):
-    # Get number of views
-    # Returns -1 if we cant find the view count
+def load_script_tag(driver: webdriver.Chrome):
+    # loads a web element with id = "scriptTag" that contains a lot of useful info
+    global SCRIPT_TAG
     try:
-        container = driver.find_element(By.XPATH, '//span[@class="view-count style-scope ytd-video-view-count-renderer"]')
-        views = int("".join(list(filter(str.isdigit, container.text))))
-    except:
-        return -1
+        SCRIPT_TAG = json.loads(driver.find_element(By.ID, "scriptTag").get_attribute("innerHTML"))
+    except AttributeError:
+        pass
 
+
+def get_video_title():
+    try:
+        video_title = SCRIPT_TAG['name']
+    except:
+        video_title = '-1'
+    return video_title
+
+
+def get_views():
+    try:
+        views = SCRIPT_TAG['interactionCount']
+    except:
+        views = -1
     return views
 
 
-def get_channel_info(driver):
-    container = driver.find_element(By.XPATH, '//ytd-channel-name[@id="channel-name"]')
-    channel = container.find_element(By.XPATH, './/a[@class="yt-simple-endpoint style-scope yt-formatted-string"]')
-
-    link = channel.get_attribute('href')
-    link = remove_prefix(link, 'https://www.youtube.com')
-
-    if '/channel/' not in link:
-        ID = link
-    else:
-        ID = remove_prefix(link, '/channel/')
-
-    return ID, channel.text
-
-
-def get_video_description(driver):
+def get_channel_name():
     try:
-        description_container = driver.find_element(By.ID, "scriptTag")
-        descr = json.loads(description_container.get_attribute("innerHTML"))
-        descr = descr['description']
+        channel_name = SCRIPT_TAG['author']
+    except:
+        channel_name = '-1'
+    return channel_name
 
-    except AttributeError:
-        return "-1"
 
+def get_video_description():
+    try:
+        descr = SCRIPT_TAG['description']
+    except:
+        descr = '-1'
     return descr
+
+
+def get_upload_date():
+    try:
+        date = SCRIPT_TAG['uploadDate']
+    except:
+        date = '-1'
+    return date
+
+def get_video_genre():
+    try:
+        genre = SCRIPT_TAG['genre']
+    except:
+        genre = '-1'
+    return genre
+
+
+def get_channel_id(driver):
+    try:
+        channel_container = driver.find_element(
+            By.CSS_SELECTOR, "#watch7-content > meta[itemprop='channelId']")
+        channel_id = channel_container.get_attribute('content')
+    except:
+        channel_id = '-1'
+    return channel_id
 
 
 def get_comment_count(driver):
@@ -225,37 +228,7 @@ def get_comment_count(driver):
     return comment_count
 
 
-def get_upload_date(driver):
-    # Get date uploaded
-    # Returns date as string and timestamp
-    container = driver.find_element(By.XPATH, '//div[@id="info-strings"]')
-    date = container.find_element(By.XPATH,'.//yt-formatted-string[@class="style-scope ytd-video-primary-info-renderer"]').text
-
-    pattern = "(Jan(uary)?|Feb(ruary)?|Mar(ch)?|Apr(il)?|May|Jun(e)?|Jul(y)?|Aug(ust)?|Sep(tember)?|Oct(ober)?|Nov(ember)?|Dec(ember)?) \d{1,2}, \d{4}"
-    
-    search = re.search(pattern, date)
-    if search is not None:
-        date = search.group()
-
-    try:
-        date_time_object = datetime.datetime.strptime(date, '%b %d, %Y')
-    except: 
-        return date, datetime.datetime(1990,1,1).timestamp()
-    
-    return date, int(date_time_object.timestamp())
-
-
 def check_if_comments_disabled(driver: webdriver.Chrome) -> bool:
-    """
-    Parameters
-    ----------
-    driver: a selenium webdriver object (should be pointed at a YouTube video)
-
-    Returns
-    -------
-    is_disabled: disable status of comments
-
-    """
 
     is_disabled: bool = False
 
@@ -279,7 +252,7 @@ def get_likes(driver):
 
     like_count = -1
 
-    # Like button aria-label is e.g. "like this video along with 282,068 other people"
+    # Like button's aria-label is "like this video along with 282,068 other people"
     like_button_container = driver.find_element(
         By.CSS_SELECTOR, "#segmented-like-button > ytd-toggle-button-renderer > yt-button-shape > button")
 
@@ -323,7 +296,7 @@ def get_merch_info(driver: webdriver.Chrome) -> str:
 
         # return control to original tab
         driver.switch_to.window(video_tab)
-    except NoSuchElementException:
+    except (NoSuchElementException, JavascriptException) as e:
         pass
 
     return url
