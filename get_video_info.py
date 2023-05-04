@@ -41,7 +41,7 @@ def get_video_info(video_url, driver: webdriver.Chrome, use_api = False) -> dict
             'video_id': video_id,
             'video_unavailable': True
         }
-        
+
     time.sleep(2)
     pause_video(driver)
     if use_api:
@@ -258,15 +258,16 @@ def check_if_comments_disabled(driver: webdriver.Chrome) -> bool:
 
 def get_likes(driver):
 
-    like_count = -1
+    try:
+        # Like button's aria-label is "like this video along with 282,068 other people"
+        like_button_container = driver.find_element(
+            By.CSS_SELECTOR, "#segmented-like-button > ytd-toggle-button-renderer > yt-button-shape > button")
 
-    # Like button's aria-label is "like this video along with 282,068 other people"
-    like_button_container = driver.find_element(
-        By.CSS_SELECTOR, "#segmented-like-button > ytd-toggle-button-renderer > yt-button-shape > button")
-
-    aria_label = like_button_container.get_attribute('aria-label')
-    aria_label = aria_label.replace(',', '')
-    like_count = int(re.findall('\d+', aria_label)[0])
+        aria_label = like_button_container.get_attribute('aria-label')
+        aria_label = aria_label.replace(',', '')
+        like_count = int(re.findall('\d+', aria_label)[0])
+    except:
+        return -1
 
     return like_count
 

@@ -5,6 +5,7 @@ from utils import *
 import pandas as pd
 import json
 import time 
+import traceback
 
 from selenium.common.exceptions import ElementNotInteractableException
 from selenium.common.exceptions import NoSuchWindowException
@@ -15,7 +16,7 @@ if __name__ == "__main__":
     # df.drop_duplicates(inplace=True)
 
     url_list = [
-        (df_index,"https://www.youtube.com/watch?v="+ i['videoid']) for df_index, i in df[:500].iterrows()
+        (df_index,"https://www.youtube.com/watch?v="+ i['videoid']) for df_index, i in df[138:141].iterrows()
     ]
 
     driver = create_driver("config.json", headless=True)
@@ -36,7 +37,10 @@ if __name__ == "__main__":
             break
         except Exception as e:
             print(e)
-            log_file.write(e + '\n')
+            log_file.write(str(type(e)) + '\n')
+            log_file.write(str(e) + '\n')
+            log_file.write(traceback.format_exc() + '\n')
+
 
     
     with open(f"output_{test_str}.json", 'w', encoding='utf-8') as f:

@@ -152,26 +152,28 @@ def get_preroll_ad_url(driver: webdriver.Chrome) -> str:
     url: url linked to by the preroll advertisement
 
     """
+    try:
+        element = driver.find_element(
+            By.CSS_SELECTOR,
+            "button.ytp-ad-button.ytp-ad-visit-advertiser-button.ytp-ad-button-link"
+        )
 
-    element = driver.find_element(
-        By.CSS_SELECTOR,
-        "button.ytp-ad-button.ytp-ad-visit-advertiser-button.ytp-ad-button-link"
-    )
+        element.click()
 
-    element.click()
+        # save current tab and switch chromedriver's focus to the new tab
+        video_tab = driver.current_window_handle
+        tabs_open = driver.window_handles
+        driver.switch_to.window(tabs_open[1])
 
-    # save current tab and switch chromedriver's focus to the new tab
-    video_tab = driver.current_window_handle
-    tabs_open = driver.window_handles
-    driver.switch_to.window(tabs_open[1])
+        # wait 5 secs to account for possible redirects
+        time.sleep(5)
+        url: str = driver.current_url
 
-    # wait 5 secs to account for possible redirects
-    time.sleep(5)
-    url: str = driver.current_url
-
-    # close tab and switch back to main tab
-    driver.close()
-    driver.switch_to.window(video_tab)
+        # close tab and switch back to main tab
+        driver.close()
+        driver.switch_to.window(video_tab)
+    except NoSuchElementException:
+        return "-1"
 
     return url
 
