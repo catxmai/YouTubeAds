@@ -16,7 +16,7 @@ if __name__ == "__main__":
     # df.drop_duplicates(inplace=True)
 
     url_list = [
-        (df_index,"https://www.youtube.com/watch?v="+ i['videoid']) for df_index, i in df[138:141].iterrows()
+        (df_index,"https://www.youtube.com/watch?v="+ i['videoid']) for df_index, i in df[138:142].iterrows()
     ]
 
     driver = create_driver("config.json", headless=True)
@@ -26,29 +26,33 @@ if __name__ == "__main__":
     _, test_str = get_test_id()
     log_file = open(f"log_{test_str}.txt", "w")
 
-    for df_index, url in url_list:
-        print(f"{df_index}, {url}")
-        log_file.write(f"{df_index}, {url}\n")
-        try:
-            video_data = get_video_info(url, driver)
-            video_data['df_index'] = df_index
-            data.append(video_data)
-        except NoSuchWindowException:
-            break
-        except Exception as e:
-            print(e)
-            log_file.write(str(type(e)) + '\n')
-            log_file.write(str(e) + '\n')
-            log_file.write(traceback.format_exc() + '\n')
-
-
-    
     with open(f"output_{test_str}.json", 'w', encoding='utf-8') as f:
-        for i, video in enumerate(data):
-            video["id"] = i
-            json.dump(video, f, ensure_ascii=True, indent=4)
-            f.write('\n')
+        for df_index, url in url_list:
 
+            i = 0
+            print(f"{df_index}, {url}")
+            log_file.write(f"{df_index}, {url}\n")
+
+            try:
+                video_data = get_video_info(url, driver)
+                video_data['df_index'] = df_index
+                video_data["id"] = i
+                json.dump(video_data, f, ensure_ascii=True, indent=4)
+                f.write('\n')
+
+            except NoSuchWindowException:
+                break
+            except Exception as e:
+                print(e)
+                log_file.write(str(type(e)) + '\n')
+                log_file.write(str(e) + '\n')
+                log_file.write(traceback.format_exc() + '\n')
+                pass
+            finally:
+                i += 1
+
+
+    f.close()
     driver.quit()
     log_file.write(f"Finished in {time.time()-start_time}s \n")
     log_file.write("Closing, goodbye")
