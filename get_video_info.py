@@ -34,7 +34,14 @@ def get_video_info(video_url, driver: webdriver.Chrome, use_api = False) -> dict
     # selenium + youtube has strange behaviour when paused immediately after
     # retrieving a url and will sometimes skip the ad prematurely, so we play
     # the video for two seconds before collecting info
-    play_video(driver)
+    try:
+        play_video(driver)
+    except ElementNotInteractableException:
+        return {
+            'video_id': video_id,
+            'video_unavailable': True
+        }
+        
     time.sleep(2)
     pause_video(driver)
     if use_api:

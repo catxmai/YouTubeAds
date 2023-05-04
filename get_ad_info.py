@@ -379,12 +379,14 @@ def get_promoted_video_info(driver: webdriver.Chrome) -> list:
 
     menu_button = driver.find_element(
         By.CSS_SELECTOR,
-        ".style-scope.ytd-compact-promoted-video-renderer > yt-icon-button > button",
+        # ".style-scope.ytd-compact-promoted-video-renderer > yt-icon-button > button",
+        "ytd-compact-promoted-video-renderer > div > div > ytd-menu-renderer > yt-icon-button > button"
     )
     menu_button.click()
     info_button = driver.find_element(
         By.CSS_SELECTOR,
-        "#items > ytd-menu-navigation-item-renderer:nth-child(2) > a > tp-yt-paper-item",
+        "#items > ytd-menu-navigation-item-renderer > a > tp-yt-paper-item"
+        # "#items > ytd-menu-navigation-item-renderer:nth-child(2) > a > tp-yt-paper-item",
     )
 
     info_button.click()

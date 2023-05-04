@@ -15,7 +15,7 @@ if __name__ == "__main__":
     # df.drop_duplicates(inplace=True)
 
     url_list = [
-        "https://www.youtube.com/watch?v="+ i for i in df['videoid'][143:243]
+        (df_index,"https://www.youtube.com/watch?v="+ i['videoid']) for df_index, i in df[:500].iterrows()
     ]
 
     driver = create_driver("config.json", headless=True)
@@ -23,16 +23,15 @@ if __name__ == "__main__":
     data = []
 
     _, test_str = get_test_id()
-    # Logging
     log_file = open(f"log_{test_str}.txt", "w")
 
-    for i, url in enumerate(url_list):
-        print(f"{i}, {url}")
-        log_file.write(f"{i}, {url}\n")
+    for df_index, url in url_list:
+        print(f"{df_index}, {url}")
+        log_file.write(f"{df_index}, {url}\n")
         try:
-            data.append(get_video_info(url, driver))
-        except ElementNotInteractableException:
-            pass
+            video_data = get_video_info(url, driver)
+            video_data['df_index'] = df_index
+            data.append(video_data)
         except NoSuchWindowException:
             break
         except Exception as e:
