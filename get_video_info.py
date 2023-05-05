@@ -44,60 +44,56 @@ def get_video_info(video_url, driver: webdriver.Chrome, use_api = False) -> dict
 
     time.sleep(2)
     pause_video(driver)
-    if use_api:
-        video_data = api.get_info(video_id)
-    else:
-        video_data = {}
-        video_data["video_id"] = video_id
-        load_script_tag(driver)
-        video_data["video_title"] = get_video_title()
-        video_data["video_url"] = "https://www.youtube.com/watch?v=" + video_id
-        video_data["channel_name"] = get_channel_name()
-        video_data["channel_id"] = get_channel_id(driver)
-        video_data["video_description"] = get_video_description()
-        video_data["date_uploaded"] = get_upload_date()
-        video_data["likes"] = get_likes(driver)
-        video_data["views"] = get_views()
-        video_data["comment_count"] = get_comment_count(driver)
-        
+
+    video_data = {}
+    video_data["video_id"] = video_id
+    load_script_tag(driver)
+    video_data["video_title"] = get_video_title()
+    video_data["video_url"] = "https://www.youtube.com/watch?v=" + video_id
+    video_data["channel_name"] = get_channel_name()
+    video_data["channel_id"] = get_channel_id(driver)
+    video_data["video_description"] = get_video_description()
+    video_data["date_uploaded"] = get_upload_date()
+    video_data["likes"] = get_likes(driver)
+    video_data["views"] = get_views()
+    video_data["comment_count"] = get_comment_count(driver)
     video_data["video_genre"] = get_video_genre()
+    video_data["preroll_ad_id"] = get_preroll_ad_id(driver)
+    video_data["preroll_ad_reasons"], video_data["preroll_ad_info"] = get_preroll_ad_info(driver)
+    video_data["preroll_ad_url"] = get_preroll_ad_url(driver)
 
-    is_preroll = check_for_preroll_ad(driver)
+    """
+    # Skipping this part for now
 
-    if is_preroll:
-        video_data["preroll_ad_id"] = get_preroll_ad_id(driver)
-        video_data["preroll_ad_reasons"], video_data["preroll_ad_info"] = get_preroll_ad_info(driver)
-        video_data["preroll_ad_url"] = get_preroll_ad_url(driver)
+    # number_of_ads_left = get_number_of_ads_left(driver)
+    # print("# of ads left: " + number_of_ads_left)
 
-        # Skipping this part for now
+    # if number_of_ads_left == 1:
+    #     preroll_ad_2: Dict[str, str] = {}
+    #     wait_for_ad(driver)
+    #     play_video(driver)
+    #     time.sleep(2)
+    #     pause_video(driver)
+    #     preroll_ad_2["ad_id"] = get_ad_info.get_ad_id(driver)
+    #     preroll_ad_2["why_info"] = str(
+    #         get_ad_info.get_why_this_ad_info(driver)
+    #     )  # Warn: list to str conversion
+    #     preroll_ad_2["ad_url"] = get_ad_info.get_preroll_advertiser_url(
+    #         driver
+    #     )
+    #     preroll_data.append(preroll_ad_2)
 
-        # number_of_ads_left = get_number_of_ads_left(driver)
-        # print("# of ads left: " + number_of_ads_left)
-
-        # if number_of_ads_left == 1:
-        #     preroll_ad_2: Dict[str, str] = {}
-        #     wait_for_ad(driver)
-        #     play_video(driver)
-        #     time.sleep(2)
-        #     pause_video(driver)
-        #     preroll_ad_2["ad_id"] = get_ad_info.get_ad_id(driver)
-        #     preroll_ad_2["why_info"] = str(
-        #         get_ad_info.get_why_this_ad_info(driver)
-        #     )  # Warn: list to str conversion
-        #     preroll_ad_2["ad_url"] = get_ad_info.get_preroll_advertiser_url(
-        #         driver
-        #     )
-        #     preroll_data.append(preroll_ad_2)
+    """
 
     #if ad is preroll, try to skip, if not then continue
-        try:
-            play_video(driver)
-            skip_ad(driver)
-            time.sleep(1)
-        except:
-            pass
+    try:
+        play_video(driver)
+        skip_ad(driver)
+        time.sleep(1)
+    except:
+        pass
 
-        pause_video(driver)
+    pause_video(driver)
 
     video_data["is_paid_promotion"] = check_sponsor_info(driver)
 
@@ -117,6 +113,7 @@ def get_video_info(video_url, driver: webdriver.Chrome, use_api = False) -> dict
     return video_data
 
 
+
 def get_video_id(driver: webdriver.Chrome) -> str:
     url = driver.current_url
     pattern = r"(?<=watch\?v=).{11}" #capture anything with 11-length after watch?v=
@@ -130,7 +127,7 @@ def load_script_tag(driver: webdriver.Chrome):
     # loads a web element with id = "scriptTag" that contains a lot of useful info
     global SCRIPT_TAG
     try:
-        time.sleep(3)
+        time.sleep(2)
         SCRIPT_TAG = json.loads(driver.find_element(By.ID, "scriptTag").get_attribute("innerHTML"))
     except AttributeError:
         pass
@@ -259,10 +256,9 @@ def check_if_comments_disabled(driver: webdriver.Chrome) -> bool:
 def get_likes(driver):
 
     # Like button's aria-label is "like this video along with 282,068 other people"
-    like_button_container = driver.find_element(
-        By.CSS_SELECTOR, "#segmented-like-button > ytd-toggle-button-renderer > yt-button-shape > button")
-
     try:
+        like_button_container = driver.find_element(
+            By.CSS_SELECTOR, "#segmented-like-button > ytd-toggle-button-renderer > yt-button-shape > button")
         aria_label = like_button_container.get_attribute('aria-label')
         aria_label = aria_label.replace(',', '')
         like_count = int(re.findall('\d+', aria_label)[0])

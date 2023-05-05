@@ -88,7 +88,6 @@ def get_preroll_ad_info(driver: webdriver.Chrome) -> tuple:
 
     """
 
-    reasons = []
     try:
         info_button = driver.find_element(
             By.CSS_SELECTOR,
@@ -110,7 +109,7 @@ def get_preroll_ad_info(driver: webdriver.Chrome) -> tuple:
         driver.switch_to.default_content()
 
     except:
-        pass
+        return [], []
 
     return reasons, advertiser_info
 
@@ -202,29 +201,32 @@ def get_side_ad_info(driver: webdriver.Chrome) -> tuple:
     reasons: list of reasons youtube provides for why the ad was served to the user
 
     """
-    menu_button = driver.find_element(
-        By.CSS_SELECTOR,
-        ".style-scope.ytd-promoted-sparkles-web-renderer > yt-icon-button > button",
-    )
-    driver.execute_script("arguments[0].click();", menu_button)
+    try:
+        menu_button = driver.find_element(
+            By.CSS_SELECTOR,
+            ".style-scope.ytd-promoted-sparkles-web-renderer > yt-icon-button > button",
+        )
+        driver.execute_script("arguments[0].click();", menu_button)
 
-    info_button = driver.find_element(
-        By.CSS_SELECTOR,
-        "#items > ytd-menu-navigation-item-renderer.style-scope.ytd-menu-popup-renderer.iron-selected > a > tp-yt-paper-item",
-    )
+        info_button = driver.find_element(
+            By.CSS_SELECTOR,
+            "#items > ytd-menu-navigation-item-renderer.style-scope.ytd-menu-popup-renderer.iron-selected > a > tp-yt-paper-item",
+        )
 
-    info_button.click()
-    iframe = driver.find_element(By.ID, "iframe")
-    driver.switch_to.frame(iframe)
+        info_button.click()
+        iframe = driver.find_element(By.ID, "iframe")
+        driver.switch_to.frame(iframe)
 
-    reasons = get_reasons(driver)
-    advertiser_info = get_advertiser_info(driver)
+        reasons = get_reasons(driver)
+        advertiser_info = get_advertiser_info(driver)
 
-    exit_button = driver.find_element(
-        By.CSS_SELECTOR, ".VfPpkd-Bz112c-LgbsSe.yHy1rc.eT1oJ.mN1ivc.YJBIwf"
-    )
-    exit_button.click()
-    driver.switch_to.default_content()
+        exit_button = driver.find_element(
+            By.CSS_SELECTOR, ".VfPpkd-Bz112c-LgbsSe.yHy1rc.eT1oJ.mN1ivc.YJBIwf"
+        )
+        exit_button.click()
+        driver.switch_to.default_content()
+    except:
+        return [], []
 
     return reasons, advertiser_info
 
@@ -373,15 +375,14 @@ def check_for_promoted_video(driver: webdriver.Chrome) -> bool:
 
     """
 
-    promoted_video_present: bool = False
     try:
         element = driver.find_element(
             By.CSS_SELECTOR, "#items > ytd-compact-promoted-video-renderer"
         )
-        promoted_video_present = True
     except NoSuchElementException:
-        pass
-    return promoted_video_present
+        return False
+
+    return True
 
 
 def get_promoted_video_info(driver: webdriver.Chrome) -> list:
@@ -399,7 +400,7 @@ def get_promoted_video_info(driver: webdriver.Chrome) -> list:
     menu_button = driver.find_element(
         By.CSS_SELECTOR,
         # ".style-scope.ytd-compact-promoted-video-renderer > yt-icon-button > button",
-        "ytd-compact-promoted-video-renderer > div > div > ytd-menu-renderer > yt-icon-button > button"
+        "ytd-menu-renderer.style-scope.ytd-compact-promoted-video-renderer > yt-icon-button > yt-interaction"
     )
     menu_button.click()
     info_button = driver.find_element(
