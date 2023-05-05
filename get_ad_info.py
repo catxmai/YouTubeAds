@@ -43,6 +43,18 @@ def get_reasons(driver: webdriver.Chrome) -> list:
     return google_info + other_info
 
 
+def get_advertiser_info(driver):
+    # Driver should be pointed at My Ad Center iframe
+
+    try:
+        ad_container = driver.find_elements(By.CLASS_NAME, "G5HdJb-fmcmS")
+        advertiser_name = ad_container[0].get_attribute("innerHTML")
+        advertiser_loc= ad_container[1].get_attribute("innerHTML")
+    except:
+        return ["-1", "-1"]
+
+    return [advertiser_name, advertiser_loc]
+
 def check_for_preroll_ad(driver: webdriver.Chrome) -> bool:
     """
     Parameters
@@ -64,7 +76,7 @@ def check_for_preroll_ad(driver: webdriver.Chrome) -> bool:
     return preroll_present
 
 
-def get_preroll_ad_info(driver: webdriver.Chrome) -> list:
+def get_preroll_ad_info(driver: webdriver.Chrome) -> tuple:
     """
     Parameters
     ----------
@@ -76,7 +88,7 @@ def get_preroll_ad_info(driver: webdriver.Chrome) -> list:
 
     """
 
-    reasons: list = []
+    reasons = []
     try:
         info_button = driver.find_element(
             By.CSS_SELECTOR,
@@ -89,6 +101,8 @@ def get_preroll_ad_info(driver: webdriver.Chrome) -> list:
         # Why this ad reasons are stored as <li> with the same class name under a generic unclassed <ul> 
 
         reasons = get_reasons(driver)
+        advertiser_info = get_advertiser_info(driver)
+    
         exit_button = driver.find_element(
             By.CSS_SELECTOR, ".VfPpkd-Bz112c-LgbsSe.yHy1rc.eT1oJ.mN1ivc.YJBIwf"
         )
@@ -98,7 +112,7 @@ def get_preroll_ad_info(driver: webdriver.Chrome) -> list:
     except:
         pass
 
-    return reasons
+    return reasons, advertiser_info
 
 
 def get_preroll_ad_id(driver: webdriver.Chrome) -> str:
@@ -177,7 +191,7 @@ def get_preroll_ad_url(driver: webdriver.Chrome) -> str:
 
     return url
 
-def get_side_ad_info(driver: webdriver.Chrome) -> list:
+def get_side_ad_info(driver: webdriver.Chrome) -> tuple:
     """
     Parameters
     ----------
@@ -202,14 +216,17 @@ def get_side_ad_info(driver: webdriver.Chrome) -> list:
     info_button.click()
     iframe = driver.find_element(By.ID, "iframe")
     driver.switch_to.frame(iframe)
+
     reasons = get_reasons(driver)
+    advertiser_info = get_advertiser_info(driver)
+
     exit_button = driver.find_element(
         By.CSS_SELECTOR, ".VfPpkd-Bz112c-LgbsSe.yHy1rc.eT1oJ.mN1ivc.YJBIwf"
     )
     exit_button.click()
     driver.switch_to.default_content()
 
-    return reasons
+    return reasons, advertiser_info
 
 
 def get_side_ad_url(driver: webdriver.Chrome) -> str:

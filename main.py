@@ -16,7 +16,7 @@ if __name__ == "__main__":
     # df.drop_duplicates(inplace=True)
 
     url_list = [
-        (df_index,"https://www.youtube.com/watch?v="+ i['videoid']) for df_index, i in df[138:142].iterrows()
+        (df_index,"https://www.youtube.com/watch?v="+ i['videoid']) for df_index, i in df[130:133].iterrows()
     ]
 
     driver = create_driver("config.json", headless=True)
@@ -27,9 +27,9 @@ if __name__ == "__main__":
     log_file = open(f"log_{test_str}.txt", "w")
 
     with open(f"output_{test_str}.json", 'w', encoding='utf-8') as f:
-        for df_index, url in url_list:
+        i = 0
 
-            i = 0
+        for df_index, url in url_list:
             print(f"{df_index}, {url}")
             log_file.write(f"{df_index}, {url}\n")
 

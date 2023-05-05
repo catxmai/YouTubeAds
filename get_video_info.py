@@ -66,7 +66,7 @@ def get_video_info(video_url, driver: webdriver.Chrome, use_api = False) -> dict
 
     if is_preroll:
         video_data["preroll_ad_id"] = get_preroll_ad_id(driver)
-        video_data["preroll_ad_info"] = get_preroll_ad_info(driver)
+        video_data["preroll_ad_reasons"], video_data["preroll_ad_info"] = get_preroll_ad_info(driver)
         video_data["preroll_ad_url"] = get_preroll_ad_url(driver)
 
         # Skipping this part for now
@@ -102,7 +102,7 @@ def get_video_info(video_url, driver: webdriver.Chrome, use_api = False) -> dict
     video_data["is_paid_promotion"] = check_sponsor_info(driver)
 
     try:
-        video_data["side_ad_info"] = get_side_ad_info(driver) 
+        video_data["side_ad_reasons"], video_data["side_ad_info"] = get_side_ad_info(driver)
         video_data["side_ad_url"] = get_side_ad_url(driver) 
     except:
         pass
@@ -258,11 +258,11 @@ def check_if_comments_disabled(driver: webdriver.Chrome) -> bool:
 
 def get_likes(driver):
 
-    try:
-        # Like button's aria-label is "like this video along with 282,068 other people"
-        like_button_container = driver.find_element(
-            By.CSS_SELECTOR, "#segmented-like-button > ytd-toggle-button-renderer > yt-button-shape > button")
+    # Like button's aria-label is "like this video along with 282,068 other people"
+    like_button_container = driver.find_element(
+        By.CSS_SELECTOR, "#segmented-like-button > ytd-toggle-button-renderer > yt-button-shape > button")
 
+    try:
         aria_label = like_button_container.get_attribute('aria-label')
         aria_label = aria_label.replace(',', '')
         like_count = int(re.findall('\d+', aria_label)[0])
