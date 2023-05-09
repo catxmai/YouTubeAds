@@ -4,9 +4,21 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 
+from google.cloud import storage
+
 import json
 import time
 import datetime
+
+
+def upload_blob(project_name, bucket_name, source_file_name, destination_blob_name):
+    # upload to gcp
+
+    storage_client = storage.Client(project=project_name)
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(destination_blob_name)
+    blob.upload_from_filename(source_file_name)
+
 
 def create_driver(config_path="", headless=True):
     # config is a json file

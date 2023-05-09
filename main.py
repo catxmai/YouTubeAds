@@ -22,17 +22,23 @@ if __name__ == "__main__":
     # If no config.json, leave empty e.g. driver = create_driver("", headless=False)
     driver = create_driver("config.json", headless=False)
 
-    if os.path.exists('logs') and os.path.exists('output'):
+    if os.path.exists('logs') and os.path.exists('output') and os.path.exists('gcp_logs'):
         pass
     else:
         os.makedirs('logs')
         os.makedirs('output')
+        os.makedirs('gcp_logs')
 
     # generate timestamp to name the log and output file
     _, test_str = get_test_id()
-    log_file = open(f"logs/log_{test_str}.txt", "w")
+    log_filename = f"logs/log_{test_str}.txt"
+    output_filename = f"output/output_{test_str}.json"
+    gcp_log_filename = f"gcp_logs/gcp_log_{test_str}.json"
 
-    with open(f"output/output_{test_str}.json", 'w', encoding='utf-8') as f:
+
+    log_file = open(log_filename, "w")
+
+    with open(output_filename, 'w', encoding='utf-8') as f:
         i = 0
 
         for df_index, url in url_list:
@@ -68,3 +74,21 @@ if __name__ == "__main__":
     log_file.write(f"Finished in {time.time()-start_time}s \n")
     log_file.write("Closing, goodbye")
     log_file.close()
+
+
+    # Upload log and output to gcp
+    gcp_log = open(gcp_log_filename, "w")
+    project_name = "dontcrimeme"
+    bucket_name = "youtube-ads-2023"
+    source_files = [output_filename, log_filename]
+
+    for file in source_files:
+        try:
+            upload_blob(project_name, bucket_name, file, file)
+            gcp_log.write(f"uploaded {file} to {bucket_name}/{file} \n")
+        except Exception as e:
+            gcp_log.write(str(type(e)) + '\n')
+            gcp_log.write(str(e) + '\n')
+            gcp_log.write(traceback.format_exc() + '\n')
+            gcp_log.flush()
+            os.fsync(gcp_log)

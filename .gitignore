@@ -5,6 +5,7 @@ keys.py
 /UserData
 /logs
 /output
+/gcp_logs
 *.exe
 *.txt
 *.json
