@@ -42,7 +42,7 @@ if __name__ == "__main__":
                 video_data = get_video_info(url, driver)
                 video_data['df_index'] = df_index
                 video_data["id"] = i
-                json.dump(video_data, f, ensure_ascii=True, indent=4)
+                json.dump(video_data, f, ensure_ascii=True)
                 f.write('\n')
                 # force write to disk. relatively expensive but data is more important
                 f.flush()

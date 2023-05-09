@@ -387,17 +387,7 @@ def check_for_promoted_video(driver: webdriver.Chrome) -> bool:
 
 
 def get_promoted_video_info(driver: webdriver.Chrome) -> tuple:
-    """
-    Parameters
-    ----------
-    driver: a selenium webdriver object (should be pointed at a YouTube video)
 
-    Returns
-    -------
-    reasons: list of reasons youtube provides for why the ad was served to the user
-
-    """
-        
     menu_button = driver.find_element(
         By.CSS_SELECTOR,
         ".style-scope.ytd-compact-promoted-video-renderer > yt-icon-button > button")
@@ -426,16 +416,6 @@ def get_promoted_video_info(driver: webdriver.Chrome) -> tuple:
 
 
 def get_promoted_video_url(driver: webdriver.Chrome) -> str:
-    """
-    Parameters
-    ----------
-    driver: a selenium webdriver object (should be pointed at a YouTube video)
-
-    Returns
-    -------
-    video_url
-
-    """
 
     element = driver.find_element(
         By.CSS_SELECTOR,

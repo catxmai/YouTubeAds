@@ -104,6 +104,8 @@ def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
     except:
         pass
 
+    video_data["channel_id"] = get_channel_id(driver)
+
     return video_data
 
 
@@ -149,6 +151,23 @@ def get_channel_name():
     except:
         channel_name = '-1'
     return channel_name
+
+def get_channel_id(driver):
+
+    try:
+
+        container = driver.find_element(
+            By.CSS_SELECTOR, ".ytp-ce-channel-title.ytp-ce-link.style-scope.ytd-player")
+        channel_url = container.get_attribute('href')
+        pattern = r"(?<=\/channel\/).{24}"
+        match = re.search(pattern, channel_url)
+
+        if match:
+            channel_id = match[0] 
+    except NoSuchElementException:
+        return "-1"
+
+    return channel_id
 
 
 def get_video_description():
