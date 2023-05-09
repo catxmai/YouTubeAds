@@ -3,6 +3,8 @@ keys.py
 /__pycache__
 /chromedriver_win32
 /UserData
+/logs
+/output
 *.exe
 *.txt
 *.json
