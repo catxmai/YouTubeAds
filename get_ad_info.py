@@ -1,5 +1,6 @@
 from urllib.parse import urlparse, parse_qs
 import time
+import re
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -385,7 +386,7 @@ def check_for_promoted_video(driver: webdriver.Chrome) -> bool:
     return True
 
 
-def get_promoted_video_info(driver: webdriver.Chrome) -> list:
+def get_promoted_video_info(driver: webdriver.Chrome) -> tuple:
     """
     Parameters
     ----------
@@ -396,13 +397,14 @@ def get_promoted_video_info(driver: webdriver.Chrome) -> list:
     reasons: list of reasons youtube provides for why the ad was served to the user
 
     """
-
+        
     menu_button = driver.find_element(
         By.CSS_SELECTOR,
-        # ".style-scope.ytd-compact-promoted-video-renderer > yt-icon-button > button",
-        "ytd-menu-renderer.style-scope.ytd-compact-promoted-video-renderer > yt-icon-button > yt-interaction"
-    )
-    menu_button.click()
+        ".style-scope.ytd-compact-promoted-video-renderer > yt-icon-button > button")
+
+
+    driver.execute_script("arguments[0].click();", menu_button)
+    
     info_button = driver.find_element(
         By.CSS_SELECTOR,
         "#items > ytd-menu-navigation-item-renderer > a > tp-yt-paper-item"
@@ -410,19 +412,21 @@ def get_promoted_video_info(driver: webdriver.Chrome) -> list:
     )
 
     info_button.click()
+
     iframe = driver.find_element(By.ID, "iframe")
     driver.switch_to.frame(iframe)
     reasons = get_reasons(driver)
+    advertiser_info = get_advertiser_info(driver)
     exit_button = driver.find_element(
         By.CSS_SELECTOR, ".VfPpkd-Bz112c-LgbsSe.yHy1rc.eT1oJ.mN1ivc.YJBIwf"
     )
     exit_button.click()
     driver.switch_to.default_content()
 
-    return reasons
+    return reasons, advertiser_info
 
 
-def get_promoted_video_id(driver: webdriver.Chrome) -> str:
+def get_promoted_video_url(driver: webdriver.Chrome) -> str:
     """
     Parameters
     ----------
@@ -430,20 +434,23 @@ def get_promoted_video_id(driver: webdriver.Chrome) -> str:
 
     Returns
     -------
-    video_id: video_id value for the promoted video
+    video_url
 
     """
 
     element = driver.find_element(
         By.CSS_SELECTOR,
-        "a.yt-simple-endpoint.style-scope.ytd-compact-promoted-video-renderer",
+        "#rendering-content > ytd-compact-promoted-video-renderer > div > a",
     )
 
     raw_url = element.get_attribute("href")
+    pattern = r"(?<=video_id=).{11}"
+    match = re.search(pattern, raw_url)
 
-    video_id = parse_qs(urlparse(raw_url).query)["video_id"][0]
+    if match:
+        return "https://www.youtube.com/watch?v=" + match[0]
 
-    return video_id
+    return "-1"
 
 
 

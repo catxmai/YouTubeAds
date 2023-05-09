@@ -103,10 +103,9 @@ def get_video_info(video_url, driver: webdriver.Chrome, use_api = False) -> dict
     except:
         pass
 
-
     try:
-        video_data["promoted_video_info"] = get_promoted_video_info(driver)
-        video_data["promoted_video_id"] = get_promoted_video_id(driver)
+        video_data["promoted_video_reasons"], video_data["promoted_video_info"] = get_promoted_video_info(driver)
+        video_data["promoted_video_url"] = get_promoted_video_url(driver)
     except:
         pass
 
