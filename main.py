@@ -19,6 +19,7 @@ if __name__ == "__main__":
         (df_index,"https://www.youtube.com/watch?v="+ i['videoid']) for df_index, i in df[127:150].iterrows()
     ]
 
+    # If no config.json, leave empty e.g. driver = create_driver("", headless=False)
     driver = create_driver("config.json", headless=False)
 
     if os.path.exists('logs') and os.path.exists('output'):
