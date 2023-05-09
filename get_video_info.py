@@ -51,7 +51,6 @@ def get_video_info(video_url, driver: webdriver.Chrome, use_api = False) -> dict
     video_data["video_title"] = get_video_title()
     video_data["video_url"] = "https://www.youtube.com/watch?v=" + video_id
     video_data["channel_name"] = get_channel_name()
-    video_data["channel_id"] = get_channel_id(driver)
     video_data["video_description"] = get_video_description()
     video_data["date_uploaded"] = get_upload_date()
     video_data["likes"] = get_likes(driver)
@@ -94,8 +93,6 @@ def get_video_info(video_url, driver: webdriver.Chrome, use_api = False) -> dict
         pass
 
     pause_video(driver)
-
-    video_data["is_paid_promotion"] = check_sponsor_info(driver)
 
     try:
         video_data["side_ad_reasons"], video_data["side_ad_info"] = get_side_ad_info(driver)
@@ -177,16 +174,6 @@ def get_video_genre():
     except:
         genre = '-1'
     return genre
-
-
-def get_channel_id(driver):
-    try:
-        channel_container = driver.find_element(
-            By.CSS_SELECTOR, "#watch7-content > meta[itemprop='channelId']")
-        channel_id = channel_container.get_attribute('content')
-    except:
-        channel_id = '-1'
-    return channel_id
 
 
 def get_comment_count(driver):

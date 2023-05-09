@@ -408,7 +408,6 @@ def get_promoted_video_info(driver: webdriver.Chrome) -> tuple:
     info_button = driver.find_element(
         By.CSS_SELECTOR,
         "#items > ytd-menu-navigation-item-renderer > a > tp-yt-paper-item"
-        # "#items > ytd-menu-navigation-item-renderer:nth-child(2) > a > tp-yt-paper-item",
     )
 
     info_button.click()
