@@ -8,14 +8,12 @@ from typing import Any, Dict
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import *
-
-import api
 from get_ad_info import *
 from video_controls import *
 from utils import *
 
 
-def get_video_info(video_url, driver: webdriver.Chrome, use_api = False) -> dict:
+def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
     """
     Parameters
     ----------
