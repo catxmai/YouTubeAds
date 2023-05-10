@@ -8,7 +8,7 @@ import time
 import traceback
 import os
 
-from selenium.common.exceptions import ElementNotInteractableException
+from selenium.common.exceptions import WebDriverException
 from selenium.common.exceptions import NoSuchWindowException
 
 if __name__ == "__main__":
@@ -55,7 +55,7 @@ if __name__ == "__main__":
                 f.flush()
                 os.fsync(f)
 
-            except NoSuchWindowException:
+            except (NoSuchWindowException, WebDriverException) as e:
                 break
             except Exception as e:
                 print(e)
@@ -92,3 +92,5 @@ if __name__ == "__main__":
             gcp_log.write(traceback.format_exc() + '\n')
             gcp_log.flush()
             os.fsync(gcp_log)
+
+    gcp_log.close()
