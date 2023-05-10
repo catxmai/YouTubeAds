@@ -12,13 +12,14 @@ def pause_video(driver: webdriver.Chrome):
     play_button = driver.find_element(
         By.CSS_SELECTOR, "button.ytp-play-button.ytp-button"
     )
-    status: str = play_button.get_attribute("data-title-no-tooltip")
+    if play_button:
+        status = play_button.get_attribute("data-title-no-tooltip")
 
-    if status == "Pause":
-        try:
-            play_button.send_keys("k")
-        except Exception as e:
-            pass
+        if status == "Pause":
+            try:
+                play_button.send_keys("k")
+            except Exception as e:
+                pass
 
 
 def play_video(driver: webdriver.Chrome):

@@ -13,14 +13,17 @@ from selenium.common.exceptions import NoSuchWindowException
 
 if __name__ == "__main__":
     start_time = time.time()
-    df = pd.read_csv("control_videos_clean.csv")
+    running_vm = False
+    video_list = "control_videos_clean.csv"
+    df = pd.read_csv(video_list)
 
     url_list = [
         (df_index,"https://www.youtube.com/watch?v="+ i['videoid']) for df_index, i in df[127:150].iterrows()
     ]
 
     # If no config.json, leave empty e.g. driver = create_driver("", headless=False)
-    driver = create_driver("config.json", headless=False)
+    config_path = "config.json"
+    driver = create_driver(config_path, headless=True)
 
     if os.path.exists('logs') and os.path.exists('output') and os.path.exists('gcp_logs'):
         pass
@@ -35,10 +38,21 @@ if __name__ == "__main__":
     output_filename = f"output/output_{test_str}.json"
     gcp_log_filename = f"gcp_logs/gcp_log_{test_str}.json"
 
-
     log_file = open(log_filename, "w")
 
+    # Log username and dataset being used
+    config_f = open(config_path, 'r')
+    config_json = json.load(config_f)
+    config_f.close()
+    log_file.write(f"Using {config_json['username']} account \n")
+    log_file.write(f"Using {video_list} \n")
+    log_file.write(f"Running on vm: {running_vm} \n")
+
     with open(output_filename, 'w', encoding='utf-8') as f:
+        f.write(f"Using {config_json['username']} account \n")
+        f.write(f"Using {video_list} \n")
+        f.write(f"Running on vm: {running_vm} \n")
+
         i = 0
 
         for df_index, url in url_list:
@@ -59,8 +73,6 @@ if __name__ == "__main__":
                 break
             except Exception as e:
                 print(e)
-                log_file.write(str(type(e)) + '\n')
-                log_file.write(str(e) + '\n')
                 log_file.write(traceback.format_exc() + '\n')
                 log_file.flush()
                 os.fsync(log_file)
@@ -87,8 +99,6 @@ if __name__ == "__main__":
             upload_blob(project_name, bucket_name, file, file)
             gcp_log.write(f"uploaded {file} to {bucket_name}/{file} \n")
         except Exception as e:
-            gcp_log.write(str(type(e)) + '\n')
-            gcp_log.write(str(e) + '\n')
             gcp_log.write(traceback.format_exc() + '\n')
             gcp_log.flush()
             os.fsync(gcp_log)
