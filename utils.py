@@ -9,6 +9,8 @@ from google.cloud import storage
 import json
 import time
 import datetime
+import glob
+import os
 
 
 def upload_blob(project_name, bucket_name, source_file_name, destination_blob_name):
@@ -19,6 +21,16 @@ def upload_blob(project_name, bucket_name, source_file_name, destination_blob_na
     blob = bucket.blob(destination_blob_name)
     blob.upload_from_filename(source_file_name)
 
+def upload_from_directory(project_name, bucket_name, source_dir, destination_dir):
+
+    rel_paths = glob.glob(source_dir + '**', recursive=True)
+    storage_client = storage.Client(project=project_name)
+    bucket = storage_client.bucket(bucket_name)
+    for local_file in rel_paths:
+        remote_path = f'{destination_dir}{"/".join(local_file.split(os.sep)[1:])}'
+        if os.path.isfile(local_file):
+            blob = bucket.blob(remote_path)
+            blob.upload_from_filename(local_file)
 
 def create_driver(config_path="", headless=True):
     # config is a json file

@@ -2,21 +2,24 @@ import re
 import datetime
 import pandas as pd
 import json
+from utils import *
 
 
 if __name__ == "__main__":
 
-	with open("output/output_20230509_1746.json", 'r') as f:
+	with open("output/output_20230510_2311.json", 'r') as f:
+		for _ in range(2):
+			next(f)
 		for line in f:
 			json_data = json.loads(line)
-			print(json_data["side_ad_reasons"])
+			if "video_title" in json_data:
+				print(json_data["preroll_ad_reasons"])
 
-	# with open("output/output_20230503_1841.json", 'r') as f:
-	# 	i = 0
-	# 	for line in f:
-	# 		while i < 1:
-	# 			print(line)
-	# 			i += 1
+	# project_name = "dontcrimeme"
+	# bucket_name = "youtube-ads-2023"
+
+	# upload_from_directory(project_name, bucket_name, "gcp_logs/", "gcp_logs/")
+
 
 			
 
