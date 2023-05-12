@@ -5,6 +5,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait 
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import NoSuchElementException
 
 
 def pause_video(driver: webdriver.Chrome):
@@ -36,23 +37,14 @@ def play_video(driver: webdriver.Chrome):
 def skip_ad(driver: webdriver.Chrome):
 
     # wait 5 seconds for ad to become skippable
-    time.sleep(6)
-    skip_button = driver.find_element(
-        By.CSS_SELECTOR, 'button.ytp-ad-skip-button.ytp-button'
-    )
-    skip_button.click()
+    time.sleep(5)
+    try:
+        skip_button = driver.find_element(
+            By.CSS_SELECTOR, 'button.ytp-ad-skip-button.ytp-button'
+        )
+        skip_button.click()
+    except NoSuchElementException:
+        pass
 
 
-def wait_for_ad(driver: webdriver.Chrome):
-
-    time_left_element = driver.find_element(
-        By.CSS_SELECTOR, "span.ytp-ad-duration-remaining > div.ytp-ad-text"
-    )
-    minutes_left, seconds_left = time_left_element.text.split(":")
-    time_left = int(minutes_left) * 60 + int(seconds_left)
-
-    # one second is added to the time left because there is a small buffer period between the end of the ad
-    # and the loading of the main video
-    play_video(driver)
-    time.sleep(time_left + 1)
-
+    

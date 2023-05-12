@@ -26,12 +26,8 @@ def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
     """
 
     driver.get(video_url)
-    video_id = get_video_id(driver)
     time.sleep(2)
-
-    # selenium + youtube has strange behaviour when paused immediately after
-    # retrieving a url and will sometimes skip the ad prematurely, so we play
-    # the video for two seconds before collecting info
+    video_id = get_video_id(driver)
     try:
         play_video(driver)
     except ElementNotInteractableException:
@@ -40,71 +36,92 @@ def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
             'video_unavailable': True
         }
 
-    time.sleep(2)
     pause_video(driver)
 
-    video_data = {}
-    video_data["video_id"] = video_id
     load_script_tag(driver)
-    video_data["video_title"] = get_video_title()
-    video_data["video_url"] = "https://www.youtube.com/watch?v=" + video_id
-    video_data["channel_name"] = get_channel_name()
-    video_data["video_description"] = get_video_description()
-    video_data["date_uploaded"] = get_upload_date()
-    video_data["likes"] = get_likes(driver)
-    video_data["views"] = get_views()
-    video_data["comment_count"] = get_comment_count(driver)
-    video_data["video_genre"] = get_video_genre()
-    video_data["preroll_ad_id"] = get_preroll_ad_id(driver)
-    video_data["preroll_ad_reasons"], video_data["preroll_ad_info"] = get_preroll_ad_info(driver)
-    video_data["preroll_ad_url"] = get_preroll_ad_url(driver)
+    video_title = get_video_title()
 
-    """
-    # Skipping this part for now
+    preroll_ad_id = get_preroll_ad_id(driver)
+    if preroll_ad_id == video_id:
+        preroll_ad_id = None
+    preroll_ad_reasons, preroll_ad_info = get_preroll_ad_info(driver)
+    preroll_ad_site = get_preroll_ad_site(driver)
+    channel_name = get_channel_name()
+    video_description = get_video_description()
+    date_uploaded = get_upload_date()
+    likes = get_likes(driver)
+    views = get_views()
+    comment_count = get_comment_count(driver)
+    video_genre = get_video_genre()
 
-    # number_of_ads_left = get_number_of_ads_left(driver)
-    # print("# of ads left: " + number_of_ads_left)
-
-    # if number_of_ads_left == 1:
-    #     preroll_ad_2: Dict[str, str] = {}
-    #     wait_for_ad(driver)
-    #     play_video(driver)
-    #     time.sleep(2)
-    #     pause_video(driver)
-    #     preroll_ad_2["ad_id"] = get_ad_info.get_ad_id(driver)
-    #     preroll_ad_2["why_info"] = str(
-    #         get_ad_info.get_why_this_ad_info(driver)
-    #     )  # Warn: list to str conversion
-    #     preroll_ad_2["ad_url"] = get_ad_info.get_preroll_advertiser_url(
-    #         driver
-    #     )
-    #     preroll_data.append(preroll_ad_2)
-
-    """
-
-    #if ad is preroll, try to skip, if not then continue
-    try:
-        play_video(driver)
-        skip_ad(driver)
-        time.sleep(1)
-    except:
-        pass
-
+    MAX_WAIT_TIME = 45 
+    preroll_ad2_id, preroll_ad2_reasons, preroll_ad2_info, preroll_ad2_site = None, None, None, None
+    if get_number_of_ads_left(driver) == 1:
+        time_left = get_ad_duration(driver)
+        if time_left < MAX_WAIT_TIME:
+            play_video(driver)
+            time.sleep(time_left + 10)
+            preroll_ad2_id = get_preroll_ad_id(driver)
+            preroll_ad2_reasons, preroll_ad2_info = get_preroll_ad_info(driver)
+            preroll_ad2_site = get_preroll_ad_site(driver)
+            
+    play_video(driver)
+    skip_ad(driver)
     pause_video(driver)
 
-    try:
-        video_data["side_ad_reasons"], video_data["side_ad_info"] = get_side_ad_info(driver)
-        video_data["side_ad_url"] = get_side_ad_url(driver) 
-    except:
-        pass
+    side_ad_reasons, side_ad_info = get_side_ad_info(driver)
+    side_ad_site = get_side_ad_site(driver) 
+    side_ad_text = get_side_ad_text(driver)
+    side_ad_img = get_side_ad_img(driver)
 
-    try:
-        video_data["promoted_video_reasons"], video_data["promoted_video_info"] = get_promoted_video_info(driver)
-        video_data["promoted_video_url"] = get_promoted_video_url(driver)
-    except:
-        pass
+    promoted_video_reasons, promoted_video_info = get_promoted_video_info(driver)
+    promoted_video_url = get_promoted_video_url(driver)
+    promoted_video_title = get_promoted_video_title(driver)
+    promoted_video_channel = get_promoted_video_channel(driver)
+    channel_id = get_channel_id(driver)
 
-    video_data["channel_id"] = get_channel_id(driver)
+    video_url = "https://www.youtube.com/watch?v=" + video_id
+    preroll_ad_url = "https://www.youtube.com/watch?v=" + preroll_ad_id if preroll_ad_id else None
+    preroll_ad2_url = "https://www.youtube.com/watch?v=" + preroll_ad2_id if preroll_ad2_id else None
+
+    video_data = {
+        'video_id': video_id,
+        'video_title': video_title,
+        'video_url': video_url,
+        'channel_name': channel_name,
+        'channel_id': channel_id,
+        'video_genre': video_genre,
+        'video_description': video_description,
+        'date_uploaded': date_uploaded,
+        'likes': likes,
+        'views': views,
+        'comment_count': comment_count,
+
+        'preroll_ad_id': preroll_ad_id,
+        'preroll_ad_url': preroll_ad_url,
+        'preroll_ad_site': preroll_ad_site,
+        'preroll_ad_reasons': preroll_ad_reasons,
+        'preroll_ad_info': preroll_ad_info,
+
+        'preroll_ad2_id': preroll_ad2_id,
+        'preroll_ad2_url': preroll_ad2_url,
+        'preroll_ad2_site': preroll_ad2_site,
+        'preroll_ad2_reasons': preroll_ad2_reasons,
+        'preroll_ad2_info': preroll_ad2_info,
+        
+        'side_ad_site': side_ad_site,
+        'side_ad_text': side_ad_text,
+        'side_ad_img': side_ad_img,
+        'side_ad_reasons': side_ad_reasons, 
+        'side_ad_info': side_ad_info,
+
+        'promoted_video_title': promoted_video_title,
+        'promoted_video_url': promoted_video_url,
+        'promoted_video_channel': promoted_video_channel,
+        'promoted_video_reasons': promoted_video_reasons,
+        'promoted_video_info': promoted_video_info,
+        
+    }
 
     return video_data
 

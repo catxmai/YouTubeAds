@@ -8,28 +8,28 @@ from selenium.common.exceptions import *
 from selenium.webdriver import ActionChains
 
 
-def check_for_banner_ad(driver: webdriver.Chrome) -> bool:
-    """
-    Parameters
-    ----------
-    driver: a selenium webdriver object (should be pointed at a YouTube video)
+def get_ad_duration(driver):
+    time_left_element = driver.find_element(
+        By.CSS_SELECTOR, "span.ytp-ad-duration-remaining > div.ytp-ad-text"
+    )
+    minutes_left, seconds_left = time_left_element.text.split(":")
+    time_left = int(minutes_left) * 60 + int(seconds_left)
 
-    Returns
-    -------
-    banner_present: a bool indicating the presence of a banner ad
+    return time_left
 
-    """
+def get_number_of_ads_left(driver) -> int:
 
-    banner_present: bool = False
-    try:
-        banner = driver.find_element(By.CSS_SELECTOR, ".ytp-ad-overlay-image")
-        banner_present = True
-    except NoSuchElementException:
-        pass
-    return banner_present
+    number_of_ads_left = 0
 
+    elements = driver.find_elements(By.CSS_SELECTOR, ".ytp-ad-text")
+    text = [element.text for element in elements]
 
-def get_reasons(driver: webdriver.Chrome) -> list:
+    if any(["Ad 1 of 2" in msg for msg in text]):
+        number_of_ads_left = 1
+
+    return number_of_ads_left
+
+def get_reasons(driver):
     try:
         google_info = driver.find_elements(By.CLASS_NAME, "QVfAMd-wPzPJb-xPjCTc-ibnC6b")
         google_info = [element.get_attribute('textContent') for element in google_info]
@@ -45,50 +45,39 @@ def get_reasons(driver: webdriver.Chrome) -> list:
 
 
 def get_advertiser_info(driver):
-    # Driver should be pointed at My Ad Center iframe
+    advertiser_name, advertiser_loc = None, None
 
     try:
         ad_container = driver.find_elements(By.CLASS_NAME, "G5HdJb-fmcmS")
-        advertiser_name = ad_container[0].get_attribute("innerHTML")
-        advertiser_loc= ad_container[1].get_attribute("innerHTML")
-    except:
-        return ["-1", "-1"]
-
-    return [advertiser_name, advertiser_loc]
-
-def check_for_preroll_ad(driver: webdriver.Chrome) -> bool:
-    """
-    Parameters
-    ----------
-    driver: a selenium webdriver object (should be pointed at a YouTube video)
-
-    Returns
-    -------
-    preroll_present: a bool indicating the presence of a preroll ad
-
-    """
-
-    preroll_present = False
-    try:
-        element = driver.find_element(By.CSS_SELECTOR, ".ytp-ad-text")
-        preroll_present = True
+        if ad_container:
+            advertiser_name = ad_container[0].get_attribute("innerHTML")
+            advertiser_loc= ad_container[1].get_attribute("innerHTML")
     except NoSuchElementException:
         pass
-    return preroll_present
+
+    return advertiser_name, advertiser_loc
+
+def check_for_preroll_ad(driver):
+
+    try:
+        element = driver.find_element(By.CSS_SELECTOR, ".ytp-ad-text")
+    except NoSuchElementException:
+        return False
+    return True
 
 
-def get_preroll_ad_info(driver: webdriver.Chrome) -> tuple:
-    """
-    Parameters
-    ----------
-    driver: a selenium webdriver object (should be pointed at a YouTube video)
+def get_preroll_ad_info(driver):
 
-    Returns
-    -------
-    reasons: list of reasons youtube provides for why the ad was served to the user
+    try:
+        reason_container = driver.find_element(By.CSS_SELECTOR, ".ytp-ad-info-dialog-ad-reasons")
+        li = reason_container.find_elements(By.CSS_SELECTOR,"li")
+        reasons = [element.get_attribute('innerHTML') for element in li] 
+        return reasons, get_advertiser_info(driver)
+    except NoSuchElementException:
+        pass
 
-    """
 
+    reasons, advertiser_info = None, None
     try:
         info_button = driver.find_element(
             By.CSS_SELECTOR,
@@ -98,37 +87,23 @@ def get_preroll_ad_info(driver: webdriver.Chrome) -> tuple:
         iframe = driver.find_element(By.ID, "iframe")
         driver.switch_to.frame(iframe) 
 
-        # Why this ad reasons are stored as <li> with the same class name under a generic unclassed <ul> 
-
         reasons = get_reasons(driver)
         advertiser_info = get_advertiser_info(driver)
-    
+
         exit_button = driver.find_element(
             By.CSS_SELECTOR, ".VfPpkd-Bz112c-LgbsSe.yHy1rc.eT1oJ.mN1ivc.YJBIwf"
         )
         exit_button.click()
         driver.switch_to.default_content()
-
-    except:
-        return [], []
+    except NoSuchElementException:
+        pass
 
     return reasons, advertiser_info
 
 
-def get_preroll_ad_id(driver: webdriver.Chrome) -> str:
-    """
-    Parameters
-    ----------
-    driver: a selenium webdriver object (should be pointed at a YouTube video)
+def get_preroll_ad_id(driver):
 
-    Returns
-    -------
-    ad_id: the video id of the youtube ad
-
-
-    """
-
-    ad_id: str = ""
+    ad_id = None
     try:
         # right clicking the video and opening the "stats for nerds" menu
         action = ActionChains(driver)
@@ -150,48 +125,46 @@ def get_preroll_ad_id(driver: webdriver.Chrome) -> str:
             By.CSS_SELECTOR, "button.html5-video-info-panel-close.ytp-button"
         )
         exit_button.click()
-    except:
+    except NoSuchElementException:
         pass
     return ad_id
 
 
-def get_preroll_ad_url(driver: webdriver.Chrome) -> str:
-    """
-    Parameters
-    ----------
-    driver: a selenium webdriver object (should be pointed at a YouTube video)
+def get_preroll_ad_site(driver):
 
-    Returns
-    -------
-    url: url linked to by the preroll advertisement
 
-    """
+    # site is usually the link to advertiser's site, but sometimes it's just the site name
+
+    site = None
+
     try:
         element = driver.find_element(
             By.CSS_SELECTOR,
             "button.ytp-ad-button.ytp-ad-visit-advertiser-button.ytp-ad-button-link"
         )
 
-        element.click()
-
-        # save current tab and switch chromedriver's focus to the new tab
-        video_tab = driver.current_window_handle
-        tabs_open = driver.window_handles
-        driver.switch_to.window(tabs_open[1])
-
-        # wait 5 secs to account for possible redirects
-        time.sleep(5)
-        url: str = driver.current_url
-
-        # close tab and switch back to main tab
-        driver.close()
-        driver.switch_to.window(video_tab)
+        site = element.get_attribute("aria-label").strip()
     except NoSuchElementException:
-        return "-1"
+        pass
 
-    return url
+        # element.click()
 
-def get_side_ad_info(driver: webdriver.Chrome) -> tuple:
+        # # save current tab and switch chromedriver's focus to the new tab
+        # video_tab = driver.current_window_handle
+        # tabs_open = driver.window_handles
+        # driver.switch_to.window(tabs_open[1])
+
+        # # wait 5 secs to account for possible redirects
+        # time.sleep(5)
+        # url: str = driver.current_url
+
+        # # close tab and switch back to main tab
+        # driver.close()
+        # driver.switch_to.window(video_tab)
+
+    return site
+
+def get_side_ad_info(driver):
     """
     Parameters
     ----------
@@ -202,6 +175,7 @@ def get_side_ad_info(driver: webdriver.Chrome) -> tuple:
     reasons: list of reasons youtube provides for why the ad was served to the user
 
     """
+    reasons, advertiser_info = None, None
     try:
         menu_button = driver.find_element(
             By.CSS_SELECTOR,
@@ -226,122 +200,74 @@ def get_side_ad_info(driver: webdriver.Chrome) -> tuple:
         )
         exit_button.click()
         driver.switch_to.default_content()
-    except:
-        return [], []
+    except NoSuchElementException:
+        pass
 
     return reasons, advertiser_info
 
 
-def get_side_ad_url(driver: webdriver.Chrome) -> str:
-    """
-    Parameters
-    ----------
-    driver: a selenium webdriver object (should be pointed at a YouTube video)
+def get_side_ad_site(driver):
 
-    Returns
-    -------
-    url: url linked to by the "sparkles" advertisement
+    # site is usually the link to advertiser's site, but sometimes it's just the site name
 
-    """
+    site = None
 
-    element = driver.find_element(
-        By.CSS_SELECTOR,
-        ".style-scope.ytd-promoted-sparkles-web-renderer > yt-button-shape > button"
-    )
+    try:
+        side_ad_container = driver.find_element(By.CSS_SELECTOR, "#website-text")
+        site = side_ad_container.get_attribute("innerHTML").strip()
+    except NoSuchElementException:
+        pass
 
-    element.click()
+    # element = driver.find_element(
+    #     By.CSS_SELECTOR,
+    #     ".style-scope.ytd-promoted-sparkles-web-renderer > yt-button-shape > button"
+    # )
 
-    # save current tab and switch chromedriver's focus to the new tab
-    video_tab = driver.current_window_handle
-    tabs_open = driver.window_handles
-    driver.switch_to.window(tabs_open[1])
+    # element.click()
 
-    # wait 5 secs to account for possible redirects
-    time.sleep(5)
-    url: str = driver.current_url
-    driver.close()
-    driver.switch_to.window(video_tab)
+    # # save current tab and switch chromedriver's focus to the new tab
+    # video_tab = driver.current_window_handle
+    # tabs_open = driver.window_handles
+    # driver.switch_to.window(tabs_open[1])
 
-    return url
+    # # wait 5 secs to account for possible redirects
+    # time.sleep(5)
+    # url: str = driver.current_url
+    # driver.close()
+    # driver.switch_to.window(video_tab)
 
+    return site
 
-def get_banner_ad_url(driver: webdriver.Chrome) -> str:
-    """
-    Parameters
-    ----------
-    driver: a selenium webdriver object (should be pointed at a YouTube video)
+def get_side_ad_text(driver):
 
-    Returns
-    -------
-    url: url linked to by the banner advertisement
+    title, body = "", ""
 
-    """
+    try:
+        title_container = driver.find_element(By.CSS_SELECTOR, "#title.style-scope.ytd-promoted-sparkles-web-renderer.yt-simple-endpoint")
+        title = title_container.get_attribute("innerHTML").strip()
+    except NoSuchElementException:
+        pass
 
-    banner = driver.find_element(By.CSS_SELECTOR, ".ytp-ad-overlay-image")
-    banner.click()
+    try:
+        body_container = driver.find_element(By.CSS_SELECTOR, "#description.style-scope.ytd-promoted-sparkles-web-renderer.yt-simple-endpoint")
+        body = body_container.get_attribute("innerHTML").strip()
+    except NoSuchElementException:
+        pass
 
-    # save current tab and switch chromedriver's focus to the new tab
-    video_tab = driver.current_window_handle
-    tabs_open = driver.window_handles
-    driver.switch_to.window(tabs_open[1])
-
-    # wait 5 secs to account for possible redirects
-    time.sleep(5)
-    url: str = driver.current_url
-
-    # close tab and switch back to main tab
-    driver.close()
-    driver.switch_to.window(video_tab)
-
-    return url
+    text = title + body
+    text = text if text else None
+    return text
 
 
-def get_number_of_ads_left(driver: webdriver.Chrome) -> int:
-    """
-    Parameters
-    ----------
-    driver: a selenium webdriver object (should be pointed at a YouTube video)
+def get_side_ad_img(driver):
 
-    Returns
-    -------
-    number_of_ads_left: the number of ads left before the main video plays
+    try:
+        img_container = driver.find_element(By.CSS_SELECTOR, "#thumbnail.style-scope.ytd-promoted-sparkles-web-renderer > img")
+        img_src = img_container.get_attribute("src")
+    except NoSuchElementException:
+        return None
 
-    """
-
-    number_of_ads_left: int = 0
-
-    elements = driver.find_elements(By.CSS_SELECTOR, ".ytp-ad-text")
-    text: list = [element.text for element in elements]
-
-    if any(["Ad 1 of 2" in msg for msg in text]):
-        number_of_ads_left = 1
-
-    return number_of_ads_left
-
-
-def is_skippable(driver: webdriver.Chrome) -> bool:
-    """
-    Parameters
-    ----------
-    driver: a selenium webdriver object (should be pointed at a YouTube video)
-
-    Returns
-    -------
-    is_skippable: a bool indicating whether the current advertisement is a
-    skippable ad
-
-    """
-
-    is_skippable: bool = True
-
-    elements = driver.find_elements(By.CSS_SELECTOR, ".ytp-ad-text")
-    text: list = [element.text for element in elements]
-
-    if any(["Ad will end" in msg for msg in text]):
-        is_skippable = False
-
-    return is_skippable
-
+    return img_src
 
 def check_for_side_ad(driver: webdriver.Chrome) -> bool:
     """
@@ -385,51 +311,82 @@ def check_for_promoted_video(driver: webdriver.Chrome) -> bool:
 
     return True
 
+def get_promoted_video_title(driver):
 
-def get_promoted_video_info(driver: webdriver.Chrome) -> tuple:
+    try:
+        container = driver.find_element(By.CSS_SELECTOR, "#video-title.style-scope.ytd-compact-promoted-video-renderer")
+        title = container.get_attribute("title")
+    except NoSuchElementException:
+        return None
 
-    menu_button = driver.find_element(
-        By.CSS_SELECTOR,
-        ".style-scope.ytd-compact-promoted-video-renderer > yt-icon-button > button")
+    return title
 
 
-    driver.execute_script("arguments[0].click();", menu_button)
-    
-    info_button = driver.find_element(
-        By.CSS_SELECTOR,
-        "#items > ytd-menu-navigation-item-renderer > a > tp-yt-paper-item"
-    )
+def get_promoted_video_channel(driver):
 
-    info_button.click()
+    try:
+        ad_container = driver.find_element(By.CSS_SELECTOR, "#endpoint-link.yt-simple-endpoint.style-scope.ytd-compact-promoted-video-renderer")
+        channel_container = ad_container.find_element(By.CSS_SELECTOR, "#text > a")
+        channel = channel_container.get_attribute("innerHTML")
+    except NoSuchElementException:
+        return None
 
-    iframe = driver.find_element(By.ID, "iframe")
-    driver.switch_to.frame(iframe)
-    reasons = get_reasons(driver)
-    advertiser_info = get_advertiser_info(driver)
-    exit_button = driver.find_element(
-        By.CSS_SELECTOR, ".VfPpkd-Bz112c-LgbsSe.yHy1rc.eT1oJ.mN1ivc.YJBIwf"
-    )
-    exit_button.click()
-    driver.switch_to.default_content()
+    return channel
+
+
+def get_promoted_video_info(driver: webdriver.Chrome):
+
+    reasons, advertiser_info = None, None
+
+    try:
+        menu_button = driver.find_element(
+            By.CSS_SELECTOR,
+            ".style-scope.ytd-compact-promoted-video-renderer > yt-icon-button > button")
+
+
+        driver.execute_script("arguments[0].click();", menu_button)
+        
+        info_button = driver.find_element(
+            By.CSS_SELECTOR,
+            "#items > ytd-menu-navigation-item-renderer > a > tp-yt-paper-item"
+        )
+
+        info_button.click()
+
+        iframe = driver.find_element(By.ID, "iframe")
+        driver.switch_to.frame(iframe)
+        reasons = get_reasons(driver)
+        advertiser_info = get_advertiser_info(driver)
+        exit_button = driver.find_element(
+            By.CSS_SELECTOR, ".VfPpkd-Bz112c-LgbsSe.yHy1rc.eT1oJ.mN1ivc.YJBIwf"
+        )
+        exit_button.click()
+        driver.switch_to.default_content()
+    except NoSuchElementException:
+        pass
 
     return reasons, advertiser_info
 
 
 def get_promoted_video_url(driver: webdriver.Chrome) -> str:
 
-    element = driver.find_element(
-        By.CSS_SELECTOR,
-        "#rendering-content > ytd-compact-promoted-video-renderer > div > a",
-    )
+    try:
+        element = driver.find_element(
+            By.CSS_SELECTOR,
+            "#rendering-content > ytd-compact-promoted-video-renderer > div > a",
+        )
 
-    raw_url = element.get_attribute("href")
-    pattern = r"(?<=video_id=).{11}"
-    match = re.search(pattern, raw_url)
+        raw_url = element.get_attribute("href")
+        pattern = r"(?<=video_id=).{11}"
+        match = re.search(pattern, raw_url)
 
-    if match:
-        return "https://www.youtube.com/watch?v=" + match[0]
+        if match:
+            return "https://www.youtube.com/watch?v=" + match[0]
 
-    return "-1"
+    except NoSuchElementException:
+        pass
+
+    return None
 
 
 
