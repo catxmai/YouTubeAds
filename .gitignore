@@ -9,3 +9,4 @@ keys.py
 *.exe
 *.txt
 *.json
+!config_example.json
