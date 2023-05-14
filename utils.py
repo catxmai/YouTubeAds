@@ -34,6 +34,12 @@ def upload_from_directory(project_name, bucket_name, source_dir, destination_dir
 
 def create_driver(config_path="", headless=True):
     # config is a json file
+    options = webdriver.ChromeOptions()
+    options.add_argument("--window-size=1540,1080")
+    options.add_argument("--no-sandbox")
+    if headless:
+        options.add_argument("--headless")
+
     if config_path:
         config = {}
         config_f = open(config_path, 'r')
@@ -42,13 +48,8 @@ def create_driver(config_path="", headless=True):
         config['username'] = config_json['username']
         config['password'] = config_json['password']
         config['user_data'] = config_json['user_data']
-    options = webdriver.ChromeOptions()
-    options.add_argument("--window-size=1540,1080")
-    options.add_argument("--no-sandbox")
-    if headless:
-        options.add_argument("--headless")
-    if config['user_data']:
-        options.add_argument("user-data-dir=" + config['user_data'])
+        if config['user_data']:
+            options.add_argument("user-data-dir=" + config['user_data'])
 
     driver = webdriver.Chrome(options = options)
 

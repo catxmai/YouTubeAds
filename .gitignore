@@ -2,7 +2,7 @@ keys.py
 *.csv
 /__pycache__
 /chromedriver_win32
-/UserData
+/UserData*
 /logs
 /output
 /gcp_logs

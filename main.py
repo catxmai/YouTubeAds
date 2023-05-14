@@ -13,17 +13,20 @@ from selenium.common.exceptions import NoSuchWindowException
 
 if __name__ == "__main__":
     start_time = time.time()
-    running_vm = False
-    is_test = True
-    video_list = "control_videos_clean.csv"
-    df = pd.read_csv(video_list)
 
+    # CHANGE THESE BEFORE RUNNING
+    running_vm = False
+    is_test = True # test mode (pretty print in output file + not upload to gcp)
+    config_path = "" # If no config.json, leave empty
+    video_list = "control_videos_clean.csv"
+    
+
+    df = pd.read_csv(video_list)
     url_list = [
         (df_index,"https://www.youtube.com/watch?v="+ i['videoid']) for df_index, i in df[128:140].iterrows()
     ]
 
-    # If no config.json, leave empty e.g. driver = create_driver("", headless=False)
-    config_path = "config.json"
+    
     driver = create_driver(config_path, headless=False)
 
     if os.path.exists('logs') and os.path.exists('output') and os.path.exists('gcp_logs'):
@@ -42,16 +45,20 @@ if __name__ == "__main__":
     log_file = open(log_filename, "w")
 
     # Log username and dataset being used
-    config_f = open(config_path, 'r')
-    config_json = json.load(config_f)
-    config_f.close()
-    log_file.write(f"Using {config_json['username']} account \n")
+    username = "anonymous"
+    if config_path:
+        config_f = open(config_path, 'r')
+        config_json = json.load(config_f)
+        config_f.close()
+        username = config_json['username']
+    
+    log_file.write(f"Using {username} account \n")
     log_file.write(f"Using {video_list} \n")
     log_file.write(f"Running on vm: {running_vm} \n")
     log_file.write(f"Testing: {is_test} \n")
 
     with open(output_filename, 'w', encoding='utf-8') as f:
-        f.write(f"Using {config_json['username']} account \n")
+        f.write(f"Using {username} account \n")
         f.write(f"Using {video_list} \n")
         f.write(f"Running on vm: {running_vm} \n")
         f.write(f"Testing: {is_test} \n")
@@ -76,6 +83,8 @@ if __name__ == "__main__":
                 os.fsync(f)
 
             except (NoSuchWindowException, WebDriverException) as e:
+                log_file.write("Browser was closed or connection was lost \n")
+                log_file.write(traceback.format_exc() + '\n')
                 break
             except Exception as e:
                 print(traceback.format_exc())
@@ -95,18 +104,19 @@ if __name__ == "__main__":
 
 
     # Upload log and output to gcp
-    # gcp_log = open(gcp_log_filename, "w")
-    # project_name = "dontcrimeme"
-    # bucket_name = "youtube-ads-2023"
-    # source_files = [output_filename, log_filename]
+    if not is_test:
+        gcp_log = open(gcp_log_filename, "w")
+        project_name = "dontcrimeme"
+        bucket_name = "youtube-ads-2023"
+        source_files = [output_filename, log_filename]
 
-    # for file in source_files:
-    #     try:
-    #         upload_blob(project_name, bucket_name, file, file)
-    #         gcp_log.write(f"uploaded {file} to {bucket_name}/{file} \n")
-    #     except Exception as e:
-    #         gcp_log.write(traceback.format_exc() + '\n')
-    #         gcp_log.flush()
-    #         os.fsync(gcp_log)
+        for file in source_files:
+            try:
+                upload_blob(project_name, bucket_name, file, file)
+                gcp_log.write(f"uploaded {file} to {bucket_name}/{file} \n")
+            except Exception as e:
+                gcp_log.write(traceback.format_exc() + '\n')
+                gcp_log.flush()
+                os.fsync(gcp_log)
 
-    # gcp_log.close()
+        gcp_log.close()

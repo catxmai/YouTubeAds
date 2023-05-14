@@ -24,7 +24,8 @@ def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
     video_data: a dict of info and stats for the current video
 
     """
-
+    if not driver:
+        return
     driver.get(video_url)
     time.sleep(2)
     video_id = get_video_id(driver)
@@ -253,26 +254,6 @@ def get_comment_count(driver):
     return comment_count
 
 
-def check_if_comments_disabled(driver: webdriver.Chrome) -> bool:
-
-    is_disabled: bool = False
-
-    try:
-        container = driver.find_element(By.ID, "message")
-
-        # check if either of the following messages is present under the video
-        # the first is for static videos the second is for live streams
-        if container.text in (
-            "Comments are turned off. Learn more",
-            "Chat is disabled for this live stream.",
-        ):
-            is_disabled = True
-    except:
-        pass
-
-    return is_disabled
-
-
 def get_likes(driver):
 
     # Like button's aria-label is "like this video along with 282,068 other people"
@@ -286,81 +267,6 @@ def get_likes(driver):
         return -1
 
     return like_count
-
-
-
-def get_merch_info(driver: webdriver.Chrome) -> str:
-    """
-    Parameters
-    ----------
-    driver: a selenium webdriver object (should be pointed at a YouTube video)
-
-    Returns
-    -------
-    url: url of the merch store or a blank string if no merch store is found
-
-    """
-
-    url = ""
-    try:
-        merch_shelf = driver.find_element(
-            By.CSS_SELECTOR,
-            "a.yt-simple-endpoint.style-scope.ytd-merch-shelf-item-renderer",
-        )
-        merch_shelf.click()
-
-        # save current tab and switch chromedriver's focus to the new tab
-        video_tab = driver.current_window_handle
-        tabs_open = driver.window_handles
-        driver.switch_to.window(tabs_open[1])
-
-        # wait 5 secs to account for possible redirects
-        time.sleep(5)
-        url = driver.current_url
-        driver.close()
-
-        # return control to original tab
-        driver.switch_to.window(video_tab)
-    except (NoSuchElementException, JavascriptException) as e:
-        pass
-
-    return url
-
-
-
-def check_sponsor_info(driver: webdriver.Chrome) -> bool:
-    """
-    NOTE:
-
-    Must be checked after getting through the ad or it will not work.
-
-    Also be aware that it disappears after several seconds so it must be captured
-    within the first few seconds.
-
-    Parameters
-    ----------
-    driver: a selenium webdriver object (should be pointed at a YouTube video)
-
-    Returns
-    -------
-    is_paid_promotion: a bool indicating the presence of a paid promotion
-    disclaimer
-
-    """
-
-    is_paid_promotion: bool = False
-
-    try:
-        container = driver.find_element(
-            By.CSS_SELECTOR, "#movie_player > div.ytp-paid-content-overlay"
-        )
-
-        if container.text:
-            is_paid_promotion = True
-    except:
-        pass
-
-    return is_paid_promotion
 
 
 def check_for_context_box(driver: webdriver.Chrome) -> bool:
