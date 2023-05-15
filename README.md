@@ -4,7 +4,7 @@ Collecting video and ads on YouTube through Selenium.
 
 ### Setup
 
-Python with Selenium package: `pip install selenium`
+Have Python. Run in cmd or git bash `pip install -r requirements.txt`
 
 Download a driver for chrome found here https://chromedriver.chromium.org/downloads. Make sure the driver matches your chrome version (check in Chrome Settings)
 Put `chromedriver.exe` in the same folder where `create_driver()` is (currently in `utils.py`, so main folder for this repo)

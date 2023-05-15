@@ -15,20 +15,20 @@ if __name__ == "__main__":
     start_time = time.time()
 
     # CHANGE THESE BEFORE RUNNING
-    running_vm = False
+    running_vm = False # on gcp
     is_test = True # test mode (pretty print in output file + not upload to gcp)
-    config_path = "" # If no config.json, leave empty
+    headless = False # running without gui
+    config_path = "config.json" # If no config.json, leave ""
     video_list = "control_videos_clean.csv"
     
 
     df = pd.read_csv(video_list)
     url_list = [
-        (df_index,"https://www.youtube.com/watch?v="+ i['videoid']) for df_index, i in df[128:140].iterrows()
+        (df_index,"https://www.youtube.com/watch?v="+ i['videoid']) for df_index, i in df[120:140].iterrows()
     ]
 
     
-    driver = create_driver(config_path, headless=False)
-
+    driver = create_driver(config_path, headless=headless)
     if os.path.exists('logs') and os.path.exists('output') and os.path.exists('gcp_logs'):
         pass
     else:
@@ -104,19 +104,19 @@ if __name__ == "__main__":
 
 
     # Upload log and output to gcp
-    if not is_test:
-        gcp_log = open(gcp_log_filename, "w")
-        project_name = "dontcrimeme"
-        bucket_name = "youtube-ads-2023"
-        source_files = [output_filename, log_filename]
+    # if not is_test:
+    #     gcp_log = open(gcp_log_filename, "w")
+    #     project_name = "dontcrimeme"
+    #     bucket_name = "youtube-ads-2023"
+    #     source_files = [output_filename, log_filename]
 
-        for file in source_files:
-            try:
-                upload_blob(project_name, bucket_name, file, file)
-                gcp_log.write(f"uploaded {file} to {bucket_name}/{file} \n")
-            except Exception as e:
-                gcp_log.write(traceback.format_exc() + '\n')
-                gcp_log.flush()
-                os.fsync(gcp_log)
+    #     for file in source_files:
+    #         try:
+    #             upload_blob(project_name, bucket_name, file, file)
+    #             gcp_log.write(f"uploaded {file} to {bucket_name}/{file} \n")
+    #         except Exception as e:
+    #             gcp_log.write(traceback.format_exc() + '\n')
+    #             gcp_log.flush()
+    #             os.fsync(gcp_log)
 
-        gcp_log.close()
+    #     gcp_log.close()

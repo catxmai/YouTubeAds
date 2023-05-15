@@ -10,3 +10,4 @@ keys.py
 *.txt
 *.json
 !config_example.json
+!requirements.txt

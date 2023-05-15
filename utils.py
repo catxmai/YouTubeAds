@@ -91,25 +91,6 @@ def remove_prefix(instr, prefix):
         return instr[:]
 
 
-def extract_urls(text: str) -> list:
-    """
-    Parameters
-    ----------
-    text: a string to be parsed for urls
-
-    Returns
-    -------
-    urls: a list of urls extracted from the input string
-
-    """
-
-    pattern: str = r"[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)"
-    matches: Any = re.finditer(pattern, text)
-    urls: list = [match.group() for match in matches]
-
-    return urls
-
-
 def get_test_id():
     # Generates an id for scraping run based on system time
     d = datetime.datetime.now()
