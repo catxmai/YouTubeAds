@@ -16,33 +16,34 @@ if __name__ == "__main__":
 
     # CHANGE THESE BEFORE RUNNING
     running_vm = False # on gcp
-    is_test = True # test mode (pretty print in output file + not upload to gcp)
     headless = False # running without gui
     config_path = "config.json" # If no config.json, leave ""
+    # video_list = "conspiracy_videos_0_500000.csv"
     video_list = "control_videos_clean.csv"
     
 
     df = pd.read_csv(video_list)
     url_list = [
-        (df_index,"https://www.youtube.com/watch?v="+ i['videoid']) for df_index, i in df[120:140].iterrows()
+        (df_index,"https://www.youtube.com/watch?v="+ i['videoid']) for df_index, i in df[129:140].iterrows()
     ]
 
     
     driver = create_driver(config_path, headless=headless)
-    if os.path.exists('logs') and os.path.exists('output') and os.path.exists('gcp_logs'):
-        pass
-    else:
-        os.makedirs('logs')
-        os.makedirs('output')
-        os.makedirs('gcp_logs')
+
+    dirs = ['logs', 'output', 'gcp_logs', 'pretty_output']
+    for dir in dirs:
+        if not os.path.exists(dir):
+            os.makedirs(dir)
 
     # generate timestamp to name the log and output file
     _, test_str = get_test_id()
     log_filename = f"logs/log_{test_str}.txt"
     output_filename = f"output/output_{test_str}.json"
     gcp_log_filename = f"gcp_logs/gcp_log_{test_str}.json"
+    pretty_output_filename = f"pretty_output/pretty_output_{test_str}.json"
 
     log_file = open(log_filename, "w")
+    pretty_output = open(pretty_output_filename, "w")
 
     # Log username and dataset being used
     username = "anonymous"
@@ -55,13 +56,16 @@ if __name__ == "__main__":
     log_file.write(f"Using {username} account \n")
     log_file.write(f"Using {video_list} \n")
     log_file.write(f"Running on vm: {running_vm} \n")
-    log_file.write(f"Testing: {is_test} \n")
 
-    with open(output_filename, 'w', encoding='utf-8') as f:
-        f.write(f"Using {username} account \n")
-        f.write(f"Using {video_list} \n")
-        f.write(f"Running on vm: {running_vm} \n")
-        f.write(f"Testing: {is_test} \n")
+    pretty_output.write(f"Using {username} account \n")
+    pretty_output.write(f"Using {video_list} \n")
+    pretty_output.write(f"Running on vm: {running_vm} \n")
+
+
+    with open(output_filename, 'w', encoding='utf-8') as output:
+        output.write(f"Using {username} account \n")
+        output.write(f"Using {video_list} \n")
+        output.write(f"Running on vm: {running_vm} \n")
 
         i = 0
 
@@ -73,14 +77,18 @@ if __name__ == "__main__":
                 video_data = get_video_info(url, driver)
                 video_data['df_index'] = df_index
                 video_data["id"] = i
-                if is_test:
-                    json.dump(video_data, f, ensure_ascii=True, indent=4)
-                else:
-                    json.dump(video_data, f, ensure_ascii=True)
-                f.write('\n')
+
+                json.dump(video_data, output, ensure_ascii=True)
+                output.write('\n')
                 # force write to disk. relatively expensive but data is more important
-                f.flush()
-                os.fsync(f)
+                output.flush()
+                os.fsync(output)
+
+                # pretty output
+                json.dump(video_data, pretty_output, ensure_ascii=True, indent=4)
+                pretty_output.write('\n')
+                pretty_output.flush()
+                os.fsync(pretty_output)
 
             except (NoSuchWindowException, WebDriverException) as e:
                 log_file.write("Browser was closed or connection was lost \n")
@@ -96,7 +104,8 @@ if __name__ == "__main__":
                 i += 1
 
 
-    f.close()
+    output.close()
+    pretty_output.close()
     driver.quit()
     log_file.write(f"Finished in {time.time()-start_time}s \n")
     log_file.write("Closing, goodbye")

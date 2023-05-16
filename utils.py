@@ -3,6 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait 
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 from google.cloud import storage
 
@@ -21,6 +22,7 @@ def upload_blob(project_name, bucket_name, source_file_name, destination_blob_na
     blob = bucket.blob(destination_blob_name)
     blob.upload_from_filename(source_file_name)
 
+
 def upload_from_directory(project_name, bucket_name, source_dir, destination_dir):
 
     rel_paths = glob.glob(source_dir + '**', recursive=True)
@@ -32,6 +34,7 @@ def upload_from_directory(project_name, bucket_name, source_dir, destination_dir
             blob = bucket.blob(remote_path)
             blob.upload_from_filename(local_file)
 
+
 def create_driver(config_path="", headless=True):
     # config is a json file
     options = webdriver.ChromeOptions()
@@ -39,6 +42,9 @@ def create_driver(config_path="", headless=True):
     options.add_argument("--no-sandbox")
     if headless:
         options.add_argument("--headless")
+
+    # capabilities = DesiredCapabilities.CHROME
+    # capabilities["pageLoadStrategy"] = "none"
 
     if config_path:
         config = {}
@@ -81,14 +87,6 @@ def youtube_login(driver: webdriver.Chrome, username, password):
     time.sleep(1)
     pEntry.send_keys(Keys.RETURN)
     time.sleep(2)
-
-def remove_prefix(instr, prefix):
-    # Remove a substr from the start of a string
-    # Returns new string without prefix
-    if instr.startswith(prefix):
-        return instr[len(prefix):]
-    else:
-        return instr[:]
 
 
 def get_test_id():

@@ -39,6 +39,9 @@ def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
 
     pause_video(driver)
 
+    preroll_ad_url = click_preroll_ad(driver)
+    side_ad_url = click_side_ad(driver)
+
     load_script_tag(driver)
     video_title = get_video_title()
 
@@ -82,8 +85,8 @@ def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
     channel_id = get_channel_id(driver)
 
     video_url = "https://www.youtube.com/watch?v=" + video_id
-    preroll_ad_url = "https://www.youtube.com/watch?v=" + preroll_ad_id if preroll_ad_id else None
-    preroll_ad2_url = "https://www.youtube.com/watch?v=" + preroll_ad2_id if preroll_ad2_id else None
+    preroll_ad_video_url = "https://www.youtube.com/watch?v=" + preroll_ad_id if preroll_ad_id else None
+    preroll_ad2_video_url = "https://www.youtube.com/watch?v=" + preroll_ad2_id if preroll_ad2_id else None
 
     video_data = {
         'video_id': video_id,
@@ -99,17 +102,19 @@ def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
         'comment_count': comment_count,
 
         'preroll_ad_id': preroll_ad_id,
+        'preroll_ad_video_url': preroll_ad_video_url,
         'preroll_ad_url': preroll_ad_url,
         'preroll_ad_site': preroll_ad_site,
         'preroll_ad_reasons': preroll_ad_reasons,
         'preroll_ad_info': preroll_ad_info,
 
         'preroll_ad2_id': preroll_ad2_id,
-        'preroll_ad2_url': preroll_ad2_url,
+        'preroll_ad2_video_url': preroll_ad2_video_url,
         'preroll_ad2_site': preroll_ad2_site,
         'preroll_ad2_reasons': preroll_ad2_reasons,
         'preroll_ad2_info': preroll_ad2_info,
         
+        'side_ad_url': side_ad_url,
         'side_ad_site': side_ad_site,
         'side_ad_text': side_ad_text,
         'side_ad_img': side_ad_img,
@@ -141,39 +146,39 @@ def load_script_tag(driver: webdriver.Chrome):
     # loads a web element with id = "scriptTag" that contains a lot of useful info
     global SCRIPT_TAG
     try:
-        time.sleep(2)
+        time.sleep(3)
         SCRIPT_TAG = json.loads(driver.find_element(By.ID, "scriptTag").get_attribute("innerHTML"))
-    except AttributeError:
+    except NoSuchElementException:
         pass
 
 
 def get_video_title():
-    try:
-        video_title = SCRIPT_TAG['name']
-    except:
-        video_title = '-1'
-    return video_title
+    return SCRIPT_TAG['name'] if SCRIPT_TAG else None
 
 
 def get_views():
-    try:
-        views = SCRIPT_TAG['interactionCount']
-    except:
-        views = -1
-    return views
+    return SCRIPT_TAG['interactionCount'] if SCRIPT_TAG else None
 
 
 def get_channel_name():
-    try:
-        channel_name = SCRIPT_TAG['author']
-    except:
-        channel_name = '-1'
-    return channel_name
+    return SCRIPT_TAG['author'] if SCRIPT_TAG else None
+
+
+def get_video_description():
+    return SCRIPT_TAG['description'] if SCRIPT_TAG else None
+
+
+def get_upload_date():
+    return SCRIPT_TAG['uploadDate'] if SCRIPT_TAG else None
+
+
+def get_video_genre():
+    return SCRIPT_TAG['genre'] if SCRIPT_TAG else None
+
 
 def get_channel_id(driver):
 
     try:
-
         container = driver.find_element(
             By.CSS_SELECTOR, ".ytp-ce-channel-title.ytp-ce-link.style-scope.ytd-player")
         channel_url = container.get_attribute('href')
@@ -183,32 +188,9 @@ def get_channel_id(driver):
         if match:
             channel_id = match[0] 
     except NoSuchElementException:
-        return "-1"
+        return None
 
     return channel_id
-
-
-def get_video_description():
-    try:
-        descr = SCRIPT_TAG['description']
-    except:
-        descr = '-1'
-    return descr
-
-
-def get_upload_date():
-    try:
-        date = SCRIPT_TAG['uploadDate']
-    except:
-        date = '-1'
-    return date
-
-def get_video_genre():
-    try:
-        genre = SCRIPT_TAG['genre']
-    except:
-        genre = '-1'
-    return genre
 
 
 def get_comment_count(driver):

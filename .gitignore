@@ -1,11 +1,13 @@
 keys.py
-*.csv
 /__pycache__
 /chromedriver_win32
 /UserData*
 /logs
 /output
 /gcp_logs
+/pretty_output
+
+*.csv
 *.exe
 *.txt
 *.json

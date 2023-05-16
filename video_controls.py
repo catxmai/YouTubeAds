@@ -6,6 +6,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import ElementNotInteractableException
 
 
 def pause_video(driver: webdriver.Chrome):
@@ -36,15 +37,21 @@ def play_video(driver: webdriver.Chrome):
 
 def skip_ad(driver: webdriver.Chrome):
 
-    # wait 5 seconds for ad to become skippable
-    time.sleep(5)
-    try:
+    def click_skip_button(driver):
         skip_button = driver.find_element(
             By.CSS_SELECTOR, 'button.ytp-ad-skip-button.ytp-button'
         )
         skip_button.click()
-    except NoSuchElementException:
-        pass
 
+    try:
+        click_skip_button(driver)
+        
+    except (NoSuchElementException, ElementNotInteractableException) as e:
+        try:
+            time.sleep(5)
+            click_skip_button(driver)
+        except (NoSuchElementException, ElementNotInteractableException) as e:
+            pass
+            
 
     

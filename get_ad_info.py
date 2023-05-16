@@ -83,20 +83,26 @@ def get_preroll_ad_info(driver):
             By.CSS_SELECTOR,
             "button.ytp-ad-button.ytp-ad-button-link.ytp-ad-clickable",
         )
-        info_button.click()
+        driver.execute_script("arguments[0].click();", info_button)
         iframe = driver.find_element(By.ID, "iframe")
         driver.switch_to.frame(iframe) 
 
         reasons = get_reasons(driver)
         advertiser_info = get_advertiser_info(driver)
 
+    except NoSuchElementException:
+        return reasons, advertiser_info
+
+    try:
         exit_button = driver.find_element(
+
             By.CSS_SELECTOR, ".VfPpkd-Bz112c-LgbsSe.yHy1rc.eT1oJ.mN1ivc.YJBIwf"
         )
         exit_button.click()
         driver.switch_to.default_content()
     except NoSuchElementException:
-        pass
+        return reasons, advertiser_info
+    
 
     return reasons, advertiser_info
 
@@ -124,7 +130,7 @@ def get_preroll_ad_id(driver):
         exit_button = driver.find_element(
             By.CSS_SELECTOR, "button.html5-video-info-panel-close.ytp-button"
         )
-        exit_button.click()
+        driver.execute_script("arguments[0].click();", exit_button)
     except NoSuchElementException:
         pass
     return ad_id
@@ -146,21 +152,6 @@ def get_preroll_ad_site(driver):
         site = element.get_attribute("aria-label").strip()
     except NoSuchElementException:
         pass
-
-        # element.click()
-
-        # # save current tab and switch chromedriver's focus to the new tab
-        # video_tab = driver.current_window_handle
-        # tabs_open = driver.window_handles
-        # driver.switch_to.window(tabs_open[1])
-
-        # # wait 5 secs to account for possible redirects
-        # time.sleep(5)
-        # url: str = driver.current_url
-
-        # # close tab and switch back to main tab
-        # driver.close()
-        # driver.switch_to.window(video_tab)
 
     return site
 
@@ -188,21 +179,26 @@ def get_side_ad_info(driver):
             "#items > ytd-menu-navigation-item-renderer.style-scope.ytd-menu-popup-renderer.iron-selected > a > tp-yt-paper-item",
         )
 
-        info_button.click()
+        driver.execute_script("arguments[0].click();", info_button)
+
         iframe = driver.find_element(By.ID, "iframe")
         driver.switch_to.frame(iframe)
 
         reasons = get_reasons(driver)
         advertiser_info = get_advertiser_info(driver)
+    except NoSuchElementException:
+        return reasons, advertiser_info
 
+    try:
         exit_button = driver.find_element(
+
             By.CSS_SELECTOR, ".VfPpkd-Bz112c-LgbsSe.yHy1rc.eT1oJ.mN1ivc.YJBIwf"
         )
         exit_button.click()
         driver.switch_to.default_content()
     except NoSuchElementException:
-        pass
-
+        return reasons, advertiser_info
+    
     return reasons, advertiser_info
 
 
@@ -218,25 +214,61 @@ def get_side_ad_site(driver):
     except NoSuchElementException:
         pass
 
-    # element = driver.find_element(
-    #     By.CSS_SELECTOR,
-    #     ".style-scope.ytd-promoted-sparkles-web-renderer > yt-button-shape > button"
-    # )
-
-    # element.click()
-
-    # # save current tab and switch chromedriver's focus to the new tab
-    # video_tab = driver.current_window_handle
-    # tabs_open = driver.window_handles
-    # driver.switch_to.window(tabs_open[1])
-
-    # # wait 5 secs to account for possible redirects
-    # time.sleep(5)
-    # url: str = driver.current_url
-    # driver.close()
-    # driver.switch_to.window(video_tab)
-
     return site
+
+
+def click_side_ad(driver):
+
+    try:
+
+        element = driver.find_element(
+            By.CSS_SELECTOR,
+            ".style-scope.ytd-promoted-sparkles-web-renderer > yt-button-shape > button"
+        )
+
+        element.click()
+    except NoSuchElementException:
+        return None
+
+    # save current tab and switch chromedriver's focus to the new tab
+    video_tab = driver.current_window_handle
+    tabs_open = driver.window_handles
+    driver.switch_to.window(tabs_open[1])
+    
+    url = driver.current_url
+    while url == "about:blank":
+        url = driver.current_url
+    driver.execute_script("window.stop();")
+    url = driver.current_url
+    driver.close()
+    driver.switch_to.window(video_tab)
+    return url
+
+def click_preroll_ad(driver):
+
+    try:
+        element = driver.find_element(
+            By.CSS_SELECTOR,
+            "button.ytp-ad-button.ytp-ad-visit-advertiser-button.ytp-ad-button-link"
+        )
+
+        element.click()
+    except NoSuchElementException:
+        return None
+
+    # save current tab and switch chromedriver's focus to the new tab
+    video_tab = driver.current_window_handle
+    tabs_open = driver.window_handles
+    driver.switch_to.window(tabs_open[1])
+    
+    url = driver.current_url
+    while url == "about:blank":
+        url = driver.current_url
+    driver.execute_script("window.stop();")
+    url = driver.current_url
+    driver.close()
+    driver.switch_to.window(video_tab)
+    return url
 
 def get_side_ad_text(driver):
 
@@ -351,7 +383,7 @@ def get_promoted_video_info(driver: webdriver.Chrome):
             "#items > ytd-menu-navigation-item-renderer > a > tp-yt-paper-item"
         )
 
-        info_button.click()
+        driver.execute_script("arguments[0].click();", info_button)
 
         iframe = driver.find_element(By.ID, "iframe")
         driver.switch_to.frame(iframe)
@@ -360,7 +392,7 @@ def get_promoted_video_info(driver: webdriver.Chrome):
         exit_button = driver.find_element(
             By.CSS_SELECTOR, ".VfPpkd-Bz112c-LgbsSe.yHy1rc.eT1oJ.mN1ivc.YJBIwf"
         )
-        exit_button.click()
+        driver.execute_script("arguments[0].click();", exit_button)
         driver.switch_to.default_content()
     except NoSuchElementException:
         pass
