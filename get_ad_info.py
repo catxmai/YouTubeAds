@@ -226,7 +226,7 @@ def click_side_ad(driver):
             ".style-scope.ytd-promoted-sparkles-web-renderer > yt-button-shape > button"
         )
 
-        element.click()
+        driver.execute_script("arguments[0].click();", element)
     except NoSuchElementException:
         return None
 
@@ -252,7 +252,7 @@ def click_preroll_ad(driver):
             "button.ytp-ad-button.ytp-ad-visit-advertiser-button.ytp-ad-button-link"
         )
 
-        element.click()
+        driver.execute_script("arguments[0].click();", element)
     except NoSuchElementException:
         return None
 
