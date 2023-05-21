@@ -6,6 +6,7 @@ keys.py
 /output
 /gcp_logs
 /pretty_output
+/ads
 
 *.csv
 *.exe

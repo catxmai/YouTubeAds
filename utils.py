@@ -3,7 +3,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait 
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 from google.cloud import storage
 
@@ -45,9 +44,6 @@ def create_driver(config_path="", headless=True):
     options.add_argument("--disable-extensions")
     if headless:
         options.add_argument("--headless")
-
-    # capabilities = DesiredCapabilities.CHROME
-    # capabilities["pageLoadStrategy"] = "none"
 
     if config_path:
         config = {}

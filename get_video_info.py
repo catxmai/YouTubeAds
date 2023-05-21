@@ -48,8 +48,10 @@ def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
     preroll_ad_id = get_preroll_ad_id(driver)
     if preroll_ad_id == video_id:
         preroll_ad_id = None
-    preroll_ad_reasons, preroll_ad_info = get_preroll_ad_info(driver)
-    preroll_ad_site = get_preroll_ad_site(driver)
+    else:
+        preroll_ad_reasons, preroll_ad_info = get_preroll_ad_info(driver)
+        preroll_ad_site = get_preroll_ad_site(driver)
+        
     channel_name = get_channel_name()
     video_description = get_video_description()
     date_uploaded = get_upload_date()
@@ -66,8 +68,11 @@ def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
             play_video(driver)
             time.sleep(time_left + 10)
             preroll_ad2_id = get_preroll_ad_id(driver)
-            preroll_ad2_reasons, preroll_ad2_info = get_preroll_ad_info(driver)
-            preroll_ad2_site = get_preroll_ad_site(driver)
+            if preroll_ad2_id == video_id:
+                preroll_ad2_id = None
+            else:
+                preroll_ad2_reasons, preroll_ad2_info = get_preroll_ad_info(driver)
+                preroll_ad2_site = get_preroll_ad_site(driver)
             
     play_video(driver)
     skip_ad(driver)
