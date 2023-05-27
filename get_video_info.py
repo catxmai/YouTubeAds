@@ -45,6 +45,7 @@ def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
     load_script_tag(driver)
     video_title = get_video_title()
 
+    preroll_ad_id, preroll_ad_reasons, preroll_ad_info, preroll_ad_site = None, None, None, None
     preroll_ad_id = get_preroll_ad_id(driver)
     if preroll_ad_id == video_id:
         preroll_ad_id = None
