@@ -95,3 +95,13 @@ def get_test_id():
     test_id = int('{date:%Y%m%d%H%M%S}'.format(date = d))
 
     return test_id, test_str
+
+
+def collect_interests(driver):
+    
+    driver.get("https://myadcenter.google.com/customize")
+    interest_cards = driver.find_elements(By.CLASS_NAME, "YcxLyd")
+    interests = [i.get_attribute("innerHTML") for i in interest_cards]
+
+    print(interests)
+    return interest_cards
