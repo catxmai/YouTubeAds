@@ -28,7 +28,8 @@ if __name__ == "__main__":
     ]
 
     
-    driver = create_driver(config_path, headless=headless)
+    driver = create_driver(config_path, headless=headless) 
+    collect_interests(driver)
 
     dirs = ['logs', 'output', 'gcp_logs', 'pretty_output']
     for dir in dirs:
