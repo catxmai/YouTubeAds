@@ -103,5 +103,4 @@ def collect_interests(driver):
     interest_cards = driver.find_elements(By.CLASS_NAME, "YcxLyd")
     interests = [i.get_attribute("innerHTML") for i in interest_cards]
 
-    print(interests)
     return interest_cards
