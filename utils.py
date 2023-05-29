@@ -103,4 +103,21 @@ def collect_interests(driver):
     interest_cards = driver.find_elements(By.CLASS_NAME, "YcxLyd")
     interests = [i.get_attribute("innerHTML") for i in interest_cards]
 
-    return interest_cards
+    return interests
+
+
+def collect_brands(driver):
+
+    driver.get("https://myadcenter.google.com/customize")
+    brand_button = driver.find_elements(By.CSS_SELECTOR, ".VfPpkd-AznF2e.WbUJNb.FEsNhd")[1]
+    tab_name = brand_button.find_element(By.CSS_SELECTOR, ".VfPpkd-jY41G-V67aGc").get_attribute("innerHTML")
+
+    if tab_name == "Brands":
+        driver.execute_script("arguments[0].click();", brand_button)
+        time.sleep(1)
+        brand_list = driver.find_elements(By.CLASS_NAME, "ByHevf")
+        brands = [i.get_attribute("innerHTML") for i in brand_list]
+    else:
+        return None
+
+    return brands
