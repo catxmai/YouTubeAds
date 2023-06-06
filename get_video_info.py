@@ -3,7 +3,6 @@ import re
 import time
 import datetime
 import json
-from typing import Any, Dict
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -152,7 +151,7 @@ def load_script_tag(driver: webdriver.Chrome):
     # loads a web element with id = "scriptTag" that contains a lot of useful info
     global SCRIPT_TAG
     try:
-        time.sleep(3)
+        time.sleep(1)
         SCRIPT_TAG = json.loads(driver.find_element(By.ID, "scriptTag").get_attribute("innerHTML"))
     except NoSuchElementException:
         pass
@@ -161,17 +160,18 @@ def load_script_tag(driver: webdriver.Chrome):
 def get_video_title():
     try:
         title = SCRIPT_TAG['name']
+        return title
     except (TypeError, KeyError) as e:
         return None
-    return title
-
+    
 
 def get_views():
     try:
         views = SCRIPT_TAG['interactionCount']
+        return views
     except (TypeError, KeyError) as e:
         return None
-    return views
+    
 
 
 def get_channel_name():
@@ -200,7 +200,7 @@ def get_upload_date():
 
 def get_video_genre():
     try:
-        views = SCRIPT_TAG['genre']
+        genre = SCRIPT_TAG['genre']
     except (TypeError, KeyError) as e:
         return None
     return genre
