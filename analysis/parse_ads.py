@@ -3,14 +3,16 @@ import datetime
 import pandas as pd
 import json
 import csv
-from utils import *	
-
+import os
 
 
 if __name__ == "__main__":
 
+	# go up one dir
+	os.chdir('..')
+
 	# CHANGE THIS
-	id = "20230530_1949"
+	id = "20230601_1751"
 
 
 	ads = open(f"ads/ads_{id}.json", "w", encoding="utf-8")
