@@ -146,7 +146,7 @@ def get_video_id(driver: webdriver.Chrome) -> str:
 
     if match:
         return match[0]
-    return "-1"
+    return None
 
 def load_script_tag(driver: webdriver.Chrome):
     # loads a web element with id = "scriptTag" that contains a lot of useful info
@@ -159,27 +159,51 @@ def load_script_tag(driver: webdriver.Chrome):
 
 
 def get_video_title():
-    return SCRIPT_TAG['name'] if SCRIPT_TAG else None
+    try:
+        title = SCRIPT_TAG['name']
+    except (TypeError, KeyError) as e:
+        return None
+    return title
 
 
 def get_views():
-    return SCRIPT_TAG['interactionCount'] if SCRIPT_TAG else None
+    try:
+        views = SCRIPT_TAG['interactionCount']
+    except (TypeError, KeyError) as e:
+        return None
+    return views
 
 
 def get_channel_name():
-    return SCRIPT_TAG['author'] if SCRIPT_TAG else None
+    try:
+        name = SCRIPT_TAG['author']
+    except (TypeError, KeyError) as e:
+        return None
+    return name
 
 
 def get_video_description():
-    return SCRIPT_TAG['description'] if SCRIPT_TAG else None
+    try:
+        description = SCRIPT_TAG['description']
+    except (TypeError, KeyError) as e:
+        return None
+    return description
 
 
 def get_upload_date():
-    return SCRIPT_TAG['uploadDate'] if SCRIPT_TAG else None
+    try:
+        date = SCRIPT_TAG['uploadDate']
+    except (TypeError, KeyError) as e:
+        return None
+    return date
 
 
 def get_video_genre():
-    return SCRIPT_TAG['genre'] if SCRIPT_TAG else None
+    try:
+        views = SCRIPT_TAG['genre']
+    except (TypeError, KeyError) as e:
+        return None
+    return genre
 
 
 def get_channel_id(driver):
@@ -235,7 +259,7 @@ def get_comment_count(driver):
     try:
         comment_count = int("".join(list(filter(str.isdigit, container.text))))
     except:
-        comment_count = -1
+        comment_count = None
 
     driver.execute_script("window.scrollTo(0, 0);")
 
@@ -252,7 +276,7 @@ def get_likes(driver):
         aria_label = aria_label.replace(',', '')
         like_count = int(re.findall('\d+', aria_label)[0])
     except:
-        return -1
+        return None
 
     return like_count
 
@@ -269,7 +293,7 @@ def check_for_context_box(driver: webdriver.Chrome) -> bool:
 
     """
 
-    context_box_present: bool = False
+    context_box_present = False
     try:
         container = driver.find_element(By.ID, "clarify-box")
 

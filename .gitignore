@@ -7,6 +7,8 @@ keys.py
 /gcp_logs
 /pretty_output
 /ads
+/.ipynb_checkpoints
+/analysis/.ipynb_checkpoints
 
 *.csv
 *.exe
