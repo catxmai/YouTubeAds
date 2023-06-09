@@ -57,14 +57,6 @@ def get_advertiser_info(driver):
 
     return advertiser_name, advertiser_loc
 
-def check_for_preroll_ad(driver):
-
-    try:
-        element = driver.find_element(By.CSS_SELECTOR, ".ytp-ad-text")
-    except NoSuchElementException:
-        return False
-    return True
-
 
 def get_preroll_ad_info(driver):
 
@@ -77,7 +69,6 @@ def get_preroll_ad_info(driver):
         pass
 
 
-    reasons, advertiser_info = None, None
     try:
         info_button = driver.find_element(
             By.CSS_SELECTOR,
@@ -90,10 +81,6 @@ def get_preroll_ad_info(driver):
         reasons = get_reasons(driver)
         advertiser_info = get_advertiser_info(driver)
 
-    except NoSuchElementException:
-        return reasons, advertiser_info
-
-    try:
         exit_button = driver.find_element(
 
             By.CSS_SELECTOR, ".VfPpkd-Bz112c-LgbsSe.yHy1rc.eT1oJ.mN1ivc.YJBIwf"
@@ -101,7 +88,7 @@ def get_preroll_ad_info(driver):
         exit_button.click()
         driver.switch_to.default_content()
     except NoSuchElementException:
-        return reasons, advertiser_info
+        return None, None
     
 
     return reasons, advertiser_info
@@ -109,7 +96,6 @@ def get_preroll_ad_info(driver):
 
 def get_preroll_ad_id(driver):
 
-    ad_id = None
     try:
         # right clicking the video and opening the "stats for nerds" menu
         action = ActionChains(driver)
@@ -131,18 +117,17 @@ def get_preroll_ad_id(driver):
             By.CSS_SELECTOR, "button.html5-video-info-panel-close.ytp-button"
         )
         driver.execute_script("arguments[0].click();", exit_button)
+        return ad_id
+
     except NoSuchElementException:
-        pass
-    return ad_id
+        return None
+
+    
 
 
 def get_preroll_ad_site(driver):
 
-
     # site is usually the link to advertiser's site, but sometimes it's just the site name
-
-    site = None
-
     try:
         element = driver.find_element(
             By.CSS_SELECTOR,
@@ -150,10 +135,11 @@ def get_preroll_ad_site(driver):
         )
 
         site = element.get_attribute("aria-label").strip()
+        return site
     except NoSuchElementException:
-        pass
+        return None
 
-    return site
+
 
 def get_side_ad_info(driver):
     """
@@ -166,7 +152,7 @@ def get_side_ad_info(driver):
     reasons: list of reasons youtube provides for why the ad was served to the user
 
     """
-    reasons, advertiser_info = None, None
+
     try:
         menu_button = driver.find_element(
             By.CSS_SELECTOR,
@@ -186,10 +172,7 @@ def get_side_ad_info(driver):
 
         reasons = get_reasons(driver)
         advertiser_info = get_advertiser_info(driver)
-    except NoSuchElementException:
-        return reasons, advertiser_info
 
-    try:
         exit_button = driver.find_element(
 
             By.CSS_SELECTOR, ".VfPpkd-Bz112c-LgbsSe.yHy1rc.eT1oJ.mN1ivc.YJBIwf"
@@ -197,7 +180,7 @@ def get_side_ad_info(driver):
         exit_button.click()
         driver.switch_to.default_content()
     except NoSuchElementException:
-        return reasons, advertiser_info
+        return None, None
     
     return reasons, advertiser_info
 
@@ -206,15 +189,13 @@ def get_side_ad_site(driver):
 
     # site is usually the link to advertiser's site, but sometimes it's just the site name
 
-    site = None
-
     try:
         side_ad_container = driver.find_element(By.CSS_SELECTOR, "#website-text")
         site = side_ad_container.get_attribute("innerHTML").strip()
+        return site
     except NoSuchElementException:
-        pass
+        return None
 
-    return site
 
 
 def click_side_ad(driver):
@@ -301,47 +282,6 @@ def get_side_ad_img(driver):
 
     return img_src
 
-def check_for_side_ad(driver: webdriver.Chrome) -> bool:
-    """
-    Parameters
-    ----------
-    driver: a selenium webdriver object (should be pointed at a YouTube video)
-
-    Returns
-    -------
-    side_ad_present: a bool indicating the presence of a "sparkles" ad
-
-    """
-    side_ad_present = False
-    try:
-        element = driver.find_element(By.CSS_SELECTOR, "#sparkles-container")
-        side_ad_present = True
-    except NoSuchElementException:
-        pass
-    return side_ad_present
-
-
-def check_for_promoted_video(driver: webdriver.Chrome) -> bool:
-    """
-    Parameters
-    ----------
-    driver: a selenium webdriver object (should be pointed at a YouTube video)
-
-    Returns
-    -------
-    promoted_video_present: a bool indicating the presence of a promoted at the top
-    of the recommended videos list
-
-    """
-
-    try:
-        element = driver.find_element(
-            By.CSS_SELECTOR, "#items > ytd-compact-promoted-video-renderer"
-        )
-    except NoSuchElementException:
-        return False
-
-    return True
 
 def get_promoted_video_title(driver):
 

@@ -13,4 +13,6 @@ if __name__ == "__main__":
 
 	# upload_from_directory(project_name, bucket_name, "UserData_catmaimx/", "UserData_catmaimx/")
 
-
+	driver = create_driver("config.json", headless=True)
+	collect_interests(driver)
+	collect_brands(driver)

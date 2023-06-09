@@ -3,6 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait 
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import *
 
 from google.cloud import storage
 
@@ -99,25 +100,31 @@ def get_test_id():
 
 def collect_interests(driver):
     
-    driver.get("https://myadcenter.google.com/customize")
-    interest_cards = driver.find_elements(By.CLASS_NAME, "YcxLyd")
-    interests = [i.get_attribute("innerHTML") for i in interest_cards]
+    try:
+        driver.get("https://myadcenter.google.com/customize")
+        interest_cards = driver.find_elements(By.CLASS_NAME, "YcxLyd")
+        interests = [i.get_attribute("innerHTML") for i in interest_cards]
 
-    return interests
+        return interests
+    except (IndexError, NoSuchElementException) as e:
+        return None
 
 
 def collect_brands(driver):
 
-    driver.get("https://myadcenter.google.com/customize")
-    brand_button = driver.find_elements(By.CSS_SELECTOR, ".VfPpkd-AznF2e.WbUJNb.FEsNhd")[1]
-    tab_name = brand_button.find_element(By.CSS_SELECTOR, ".VfPpkd-jY41G-V67aGc").get_attribute("innerHTML")
+    try:
+        driver.get("https://myadcenter.google.com/customize")
+        brand_button = driver.find_elements(By.CSS_SELECTOR, ".VfPpkd-AznF2e.WbUJNb.FEsNhd")[1]
+        tab_name = brand_button.find_element(By.CSS_SELECTOR, ".VfPpkd-jY41G-V67aGc").get_attribute("innerHTML")
 
-    if tab_name == "Brands":
-        driver.execute_script("arguments[0].click();", brand_button)
-        time.sleep(1)
-        brand_list = driver.find_elements(By.CLASS_NAME, "ByHevf")
-        brands = [i.get_attribute("innerHTML") for i in brand_list]
-    else:
-        return None
+        if tab_name == "Brands":
+            driver.execute_script("arguments[0].click();", brand_button)
+            time.sleep(1)
+            brand_list = driver.find_elements(By.CLASS_NAME, "ByHevf")
+            brands = [i.get_attribute("innerHTML") for i in brand_list]
+        else:
+            return None
 
-    return brands
+        return brands
+    except (IndexError, NoSuchElementException) as e:
+        return None 

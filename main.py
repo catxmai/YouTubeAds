@@ -29,7 +29,6 @@ if __name__ == "__main__":
 
     
     driver = create_driver(config_path, headless=headless) 
-    collect_interests(driver)
 
     dirs = ['logs', 'output', 'gcp_logs', 'pretty_output']
     for dir in dirs:
@@ -114,19 +113,18 @@ if __name__ == "__main__":
 
 
     # Upload log and output to gcp
-    # if not is_test:
-    #     gcp_log = open(gcp_log_filename, "w")
-    #     project_name = "dontcrimeme"
-    #     bucket_name = "youtube-ads-2023"
-    #     source_files = [output_filename, log_filename]
+    gcp_log = open(gcp_log_filename, "w")
+    project_name = "dontcrimeme"
+    bucket_name = "youtube-ads-2023"
+    source_files = [output_filename, log_filename]
 
-    #     for file in source_files:
-    #         try:
-    #             upload_blob(project_name, bucket_name, file, file)
-    #             gcp_log.write(f"uploaded {file} to {bucket_name}/{file} \n")
-    #         except Exception as e:
-    #             gcp_log.write(traceback.format_exc() + '\n')
-    #             gcp_log.flush()
-    #             os.fsync(gcp_log)
+    for file in source_files:
+        try:
+            upload_blob(project_name, bucket_name, file, file)
+            gcp_log.write(f"uploaded {file} to {bucket_name}/{file} \n")
+        except Exception as e:
+            gcp_log.write(traceback.format_exc() + '\n')
+            gcp_log.flush()
+            os.fsync(gcp_log)
 
-    #     gcp_log.close()
+    gcp_log.close()

@@ -9,6 +9,7 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import *
 from get_ad_info import *
 from video_controls import *
+
 from utils import *
 
 
@@ -37,9 +38,6 @@ def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
         }
 
     pause_video(driver)
-
-    preroll_ad_url = click_preroll_ad(driver)
-    side_ad_url = click_side_ad(driver)
 
     load_script_tag(driver)
     video_title = get_video_title()
@@ -108,7 +106,7 @@ def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
 
         'preroll_ad_id': preroll_ad_id,
         'preroll_ad_video_url': preroll_ad_video_url,
-        'preroll_ad_url': preroll_ad_url,
+        # 'preroll_ad_url': preroll_ad_url,
         'preroll_ad_site': preroll_ad_site,
         'preroll_ad_reasons': preroll_ad_reasons,
         'preroll_ad_info': preroll_ad_info,
@@ -119,7 +117,7 @@ def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
         'preroll_ad2_reasons': preroll_ad2_reasons,
         'preroll_ad2_info': preroll_ad2_info,
         
-        'side_ad_url': side_ad_url,
+        # 'side_ad_url': side_ad_url,
         'side_ad_site': side_ad_site,
         'side_ad_text': side_ad_text,
         'side_ad_img': side_ad_img,
@@ -173,37 +171,37 @@ def get_views():
         return None
     
 
-
 def get_channel_name():
     try:
         name = SCRIPT_TAG['author']
+        return name
     except (TypeError, KeyError) as e:
         return None
-    return name
-
+    
 
 def get_video_description():
     try:
         description = SCRIPT_TAG['description']
+        return description
     except (TypeError, KeyError) as e:
         return None
-    return description
-
+    
 
 def get_upload_date():
     try:
         date = SCRIPT_TAG['uploadDate']
+        return date
     except (TypeError, KeyError) as e:
         return None
-    return date
-
+    
 
 def get_video_genre():
     try:
         genre = SCRIPT_TAG['genre']
+        return genre
     except (TypeError, KeyError) as e:
         return None
-    return genre
+    
 
 
 def get_channel_id(driver):
@@ -225,7 +223,7 @@ def get_channel_id(driver):
 
 def get_comment_count(driver):
     # Comment count is not searchable in html element if don't scroll down
-    # Returns -1 if can't get comment count
+
     SCROLL_PAUSE_TIME = .5
 
     last_height = driver.execute_script("return document.documentElement.scrollHeight")
@@ -250,7 +248,7 @@ def get_comment_count(driver):
 
             if (new_height == last_height) and count > 3:
                 driver.execute_script("window.scrollTo(0, 0);")
-                return -1
+                return None
             last_height = new_height
 
         count += 1
