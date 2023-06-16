@@ -102,6 +102,7 @@ def collect_interests(driver):
     
     try:
         driver.get("https://myadcenter.google.com/customize")
+        # time.sleep(1000000)
         interest_cards = driver.find_elements(By.CLASS_NAME, "YcxLyd")
         interests = [i.get_attribute("innerHTML") for i in interest_cards]
 
