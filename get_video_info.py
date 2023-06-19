@@ -13,11 +13,13 @@ from video_controls import *
 from utils import *
 
 
-def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
+def get_video_info(video_url, driver: webdriver.Chrome, mode="collect", sleep=0) -> dict:
     """
     Parameters
     ----------
     driver: a selenium webdriver object (should be pointed at a YouTube video)
+    mode: "prime" (not collecting ads) or "collect"
+    sleep: extra sleep time per video (in seconds)
 
     Returns
     -------
@@ -37,8 +39,50 @@ def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
             'video_unavailable': True
         }
 
-    pause_video(driver)
+    if mode == "collect":
+        return _collect_video(driver, sleep=sleep)
+    elif mode == "prime":
+        return _prime_video(driver, sleep=sleep)
 
+    return None
+
+def _prime_video(driver, sleep):
+
+    video_id = get_video_id(driver)
+    load_script_tag(driver)
+    video_title = get_video_title()
+    channel_name = get_channel_name()
+    video_description = get_video_description()
+    date_uploaded = get_upload_date()
+    likes = get_likes(driver)
+    views = get_views()
+    comment_count = get_comment_count(driver)
+    video_genre = get_video_genre()
+    channel_id = get_channel_id(driver)
+    video_url = "https://www.youtube.com/watch?v=" + video_id
+
+    time.sleep(sleep)
+
+    video_data = {
+        'video_id': video_id,
+        'video_title': video_title,
+        'video_url': video_url,
+        'channel_name': channel_name,
+        'channel_id': channel_id,
+        'video_genre': video_genre,
+        'video_description': video_description,
+        'date_uploaded': date_uploaded,
+        'likes': likes,
+        'views': views,
+        'comment_count': comment_count,
+    }
+
+    return video_data
+
+def _collect_video(driver, sleep):
+
+    video_id = get_video_id(driver)
+    pause_video(driver)
     load_script_tag(driver)
     video_title = get_video_title()
 
@@ -74,6 +118,7 @@ def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
             
     play_video(driver)
     skip_ad(driver)
+    time.sleep(sleep)
     pause_video(driver)
 
     side_ad_reasons, side_ad_info = get_side_ad_info(driver)
@@ -106,7 +151,6 @@ def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
 
         'preroll_ad_id': preroll_ad_id,
         'preroll_ad_video_url': preroll_ad_video_url,
-        # 'preroll_ad_url': preroll_ad_url,
         'preroll_ad_site': preroll_ad_site,
         'preroll_ad_reasons': preroll_ad_reasons,
         'preroll_ad_info': preroll_ad_info,
@@ -117,7 +161,6 @@ def get_video_info(video_url, driver: webdriver.Chrome) -> dict:
         'preroll_ad2_reasons': preroll_ad2_reasons,
         'preroll_ad2_info': preroll_ad2_info,
         
-        # 'side_ad_url': side_ad_url,
         'side_ad_site': side_ad_site,
         'side_ad_text': side_ad_text,
         'side_ad_img': side_ad_img,
@@ -166,7 +209,7 @@ def get_video_title():
 def get_views():
     try:
         views = SCRIPT_TAG['interactionCount']
-        return views
+        return int(views)
     except (TypeError, KeyError) as e:
         return None
     

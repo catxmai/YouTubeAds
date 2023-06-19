@@ -15,7 +15,7 @@ if __name__ == "__main__":
     start_time = time.time()
 
     # CHANGE THESE BEFORE RUNNING
-    running_vm = True # on gcp
+    running_vm = False # on gcp
     headless = True # running without gui
     config_path = "config.json" # If no config.json, leave ""
     video_list = "conspiracy_videos_0_500000.csv"
@@ -68,7 +68,7 @@ if __name__ == "__main__":
             log_file.write(f"{df_index}, {url}\n")
 
             try:
-                video_data = get_video_info(url, driver)
+                video_data = get_video_info(url, driver, mode="prime", sleep=0)
                 video_data['df_index'] = df_index
                 video_data["id"] = i
 
