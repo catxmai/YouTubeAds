@@ -29,3 +29,10 @@ if __name__ == "__main__":
 	# 		json.dump(json_data, output, ensure_ascii=True)
 	# 		output.write('\n')
 	# output.close()
+
+	driver = create_driver("config.json", headless=False)
+	driver.get("https://www.youtube.com")
+	time.sleep(5)
+	driver.close()
+	driver = create_driver("config.json", headless=False)
+	driver.get("https://www.youtube.com")
