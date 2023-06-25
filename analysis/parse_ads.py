@@ -9,12 +9,12 @@ import os
 if __name__ == "__main__":
 
 	# go up one dir
-	os.chdir('..')
+	if not os.path.exists("ads/"):
+		os.chdir("..")
 
 	# CHANGE THIS
-	id = "20230615_2208"
+	id = "20230623_2257"
 	
-
 
 	ads = open(f"ads/ads_{id}.json", "w", encoding="utf-8")
 	side_ad_csv_file = open(f"ads/side_ads_{id}.csv", "w", encoding="utf-8")
