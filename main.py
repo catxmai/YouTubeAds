@@ -13,7 +13,7 @@ from selenium.common.exceptions import NoSuchWindowException
 
 VIDEO_COUNT = 0
 
-def run_video_list(config_path, mode, sleep, video_list, start_index, end_index, output, log_file):
+def run_video_list(config_path, mode, headless, sleep, video_list, start_index, end_index, output, log_file):
     global VIDEO_COUNT
     
     df = pd.read_csv(video_list)
@@ -42,7 +42,7 @@ def run_video_list(config_path, mode, sleep, video_list, start_index, end_index,
             log_file.write("Browser was closed or connection was lost \n")
             log_file.write("Restarting driver \n")
             driver.quit()
-            run_video_list(config_path, mode, sleep, video_list, start_index+VIDEO_COUNT, end_index,
+            run_video_list(config_path, mode, headless, sleep, video_list, start_index+VIDEO_COUNT, end_index,
                            output, log_file)
             break
 
@@ -59,7 +59,7 @@ if __name__ == "__main__":
     # CHANGE THESE BEFORE RUNNING
     ##########################################################
     running_vm = False # on gcp
-    headless = True # running without gui
+    headless = False # running without gui
     mode = "collect" # mode is "prime" or "collect"
     sleep = 0 # stay an extra number of seconds per video
     config_path = "config.json" # If no config.json, leave ""
@@ -100,7 +100,7 @@ if __name__ == "__main__":
 
     # Start collecting data
     while VIDEO_COUNT < (end_index-start_index):
-        run_video_list(config_path, mode, sleep, video_list,
+        run_video_list(config_path, mode, headless, sleep, video_list,
                        start_index+VIDEO_COUNT, end_index, output, log_file)
         
     output.close()
