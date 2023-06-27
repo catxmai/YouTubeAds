@@ -14,5 +14,6 @@ keys.py
 *.exe
 *.txt
 *.json
+*.xlsx
 !config_example.json
 !requirements.txt

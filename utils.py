@@ -46,23 +46,31 @@ def create_driver(config_path="", headless=True):
     if headless:
         options.add_argument("--headless")
 
+    config = {}
     if config_path:
-        config = {}
         config_f = open(config_path, 'r')
-        config_json = json.load(config_f)
+        config = json.load(config_f)
         config_f.close()
-        config['username'] = config_json['username']
-        config['password'] = config_json['password']
-        config['user_data'] = config_json['user_data']
         if config['user_data']:
             options.add_argument("user-data-dir=" + config['user_data'])
-
+        
     driver = webdriver.Chrome(options = options)
 
     try:
-        youtube_login(driver, config['username'], config['password'] )
+        youtube_login(driver, config['username'], config['password'])
     except:
         pass
+
+    if 'username' in config:
+        check_login(driver, config['username']+"@gmail.com")
+
+    if config["activity_on"]:
+        turn_on_activity(driver)
+        turn_on_youtube_history(driver)
+    else:
+        turn_off_activity(driver)
+        turn_off_youtube_history(driver)
+
     return driver
 
 
@@ -87,6 +95,13 @@ def youtube_login(driver: webdriver.Chrome, username, password):
     time.sleep(1)
     pEntry.send_keys(Keys.RETURN)
     time.sleep(2)
+
+
+
+def check_login(driver, email):
+    driver.get("https://www.gmail.com")
+    time.sleep(1)
+    assert(email in driver.title)
 
 
 def get_test_id():
@@ -128,3 +143,127 @@ def collect_brands(driver):
         return brands
     except (IndexError, NoSuchElementException) as e:
         return None 
+    
+
+def turn_on_activity(driver):
+    activity_controls_url = "https://myactivity.google.com/activitycontrols?settings=search&utm_source=my-activity&facs=1"
+    driver.get(activity_controls_url)
+
+    try:
+        turnonButton = driver.find_element("xpath", '//span[text()="Turn on"]')
+        turnonButton.click()
+    except NoSuchElementException:
+        driver.find_element("xpath", '//span[text()="Turn off"]')
+        print("Activity is already on")
+        return
+    
+    time.sleep(1)
+    # Scroll to bottom of popup to enable Turn on activity
+    popup = driver.find_element(By.CSS_SELECTOR, ".cSvfje")
+    driver.execute_script("arguments[0].scroll(0, arguments[0].scrollHeight);", popup)
+    time.sleep(1)
+
+    finalButton = driver.find_element(
+        By.CSS_SELECTOR,
+        "button.VfPpkd-LgbsSe.VfPpkd-LgbsSe-OWXEXe-k8QpJ.VfPpkd-LgbsSe-OWXEXe-dgl2Hf.nCP5yc.AjY5Oe.DuMIQc.LQeN7.QWgF9b",
+    )
+    finalButton.click()
+    time.sleep(1)
+    print("Activity is turned on")
+
+
+
+def turn_off_activity(driver):
+    activity_controls_url = "https://myactivity.google.com/activitycontrols?settings=search&utm_source=my-activity&facs=1"
+    driver.get(activity_controls_url)
+
+    try:
+        turnoffButton = driver.find_element("xpath", '//span[text()="Turn off"]')
+        turnoffButton.click()
+    except NoSuchElementException:
+        driver.find_element("xpath", '//span[text()="Turn on"]')
+        print("Activity is already off")
+        return
+
+    time.sleep(2)
+    finalButton = driver.find_element(
+        By.CSS_SELECTOR, "li.FFr0qd.VfPpkd-StrnGf-rymPhb-ibnC6b"
+    )
+    finalButton.click()
+
+    time.sleep(1)
+
+    gotitButton = driver.find_element(
+        "xpath", '//span[text()="Got it"]'
+    )
+    gotitButton.click()
+    print("Activity is turned off")
+
+
+
+def turn_off_youtube_history(driver):
+    history_controls_url = "https://myactivity.google.com/product/youtube/controls?utm_source=my-activity"
+    driver.get(history_controls_url)
+
+    try:
+        turnoffButton = driver.find_element("xpath", '//span[text()="Turn off"]')
+        turnoffButton.click()
+    except NoSuchElementException:
+        driver.find_element("xpath", '//span[text()="Turn on"]')
+        print("YouTube history is already off")
+        return
+    
+    
+    time.sleep(1)
+
+    pauseButton = driver.find_element(
+        By.CSS_SELECTOR, "button.VfPpkd-LgbsSe.VfPpkd-LgbsSe-OWXEXe-k8QpJ.VfPpkd-LgbsSe-OWXEXe-dgl2Hf.nCP5yc.AjY5Oe.DuMIQc.LQeN7.yARu6e"
+    )
+    
+    pauseButton.click()
+ 
+    time.sleep(1)
+    try:
+        gotitButton = driver.find_element(
+            "xpath", '//span[text()="Got it"]'
+        )
+        gotitButton.click()
+    except NoSuchElementException:
+        pass
+
+    print("YouTube history is turned off")
+
+
+def turn_on_youtube_history(driver):
+    history_controls_url = "https://myactivity.google.com/product/youtube/controls?utm_source=my-activity"
+    driver.get(history_controls_url)
+    
+    try:
+        turnonButton = driver.find_element("xpath", '//span[text()="Turn on"]')
+        turnonButton.click()
+    except NoSuchElementException:
+        driver.find_element("xpath", '//span[text()="Turn off"]')
+        print("YouTube history is already on")
+        return
+
+    time.sleep(1)
+    try:
+        finalButton = driver.find_element(
+            By.CSS_SELECTOR,
+            "button.VfPpkd-LgbsSe.VfPpkd-LgbsSe-OWXEXe-k8QpJ.VfPpkd-LgbsSe-OWXEXe-dgl2Hf.nCP5yc.AjY5Oe.DuMIQc.LQeN7.yARu6e",
+        )
+        finalButton.click()
+    except NoSuchElementException:
+        pass
+
+    time.sleep(1)
+
+    try:
+        gotitButton = driver.find_element(
+            "xpath", '//span[text()="Got it"]'
+        )
+        gotitButton.click()
+    except NoSuchElementException:
+        pass
+
+    print("YouTube history is turned on")
