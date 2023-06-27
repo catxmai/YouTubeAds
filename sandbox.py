@@ -14,8 +14,3 @@ if __name__ == "__main__":
 	# upload_from_directory(project_name, bucket_name, "UserData_catmaimx/", "UserData_catmaimx/")
 
 	driver = create_driver("config.json", headless=False)
-	driver.get("https://www.youtube.com")
-	time.sleep(5)
-	driver.close()
-	driver = create_driver("config.json", headless=False)
-	driver.get("https://www.youtube.com")

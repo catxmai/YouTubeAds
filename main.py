@@ -101,18 +101,23 @@ if __name__ == "__main__":
 
     # Log username and dataset being used
     username = "anonymous"
+    ad_personalization_on, activity_on = None, None
     if config_path:
         config_f = open(config_path, 'r')
-        config_json = json.load(config_f)
+        config = json.load(config_f)
         config_f.close()
-        username = config_json['username']
+        username = config["username"]
+        ad_personalization_on = config["ad_personalization_on"]
+        activity_on = config["activity_on"]
     
     log_file.write(f"Using {username} account \n")
     log_file.write(f"Using {video_list}[{start_index}:{end_index}], until_available: {until_number_of_available_videos}\n")
+    log_file.write(f"Ad personalization on: {ad_personalization_on}, Activity on: {activity_on}\n")
     log_file.write(f"Running on vm: {running_vm} \n")
 
     output.write(f"Using {username} account \n")
     output.write(f"Using {video_list}[{start_index}:{end_index}], until_available: {until_number_of_available_videos}\n")
+    output.write(f"Ad personalization on: {ad_personalization_on}, Activity on: {activity_on}\n")
     output.write(f"Running on vm: {running_vm} \n")
 
     # Start collecting data

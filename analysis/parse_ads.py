@@ -13,7 +13,7 @@ if __name__ == "__main__":
 		os.chdir("..")
 
 	# CHANGE THIS
-	id = "20230623_2257"
+	id = "20230625_0044"
 	
 
 	ads = open(f"ads/ads_{id}.json", "w", encoding="utf-8")
@@ -38,7 +38,7 @@ if __name__ == "__main__":
 	vid_count, unavailable_count, ad_count, preroll_count, side_count, promoted_count = 0, 0, 0, 0, 0, 0
 
 	with open(f"output/output_{id}.json", 'r', encoding="utf-8") as f:
-		for _ in range(3):
+		for _ in range(4):
 			next(f)
 		for line in f:
 			line = line.replace("This link opens in new tab", "")
