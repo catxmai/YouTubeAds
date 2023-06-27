@@ -138,3 +138,57 @@ def collect_brands(driver):
         return brands
     except (IndexError, NoSuchElementException) as e:
         return None 
+    
+
+def turn_on_activity(driver):
+    activity_controls_url = "https://myactivity.google.com/activitycontrols?settings=search&utm_source=my-activity&facs=1"
+    driver.get(activity_controls_url)
+
+    try:
+        turnonButton = driver.find_element("xpath", '//span[text()="Turn on"]')
+        turnonButton.click()
+    except NoSuchElementException:
+        driver.find_element("xpath", '//span[text()="Turn off"]')
+        print("Activity is already on")
+        return
+    
+    time.sleep(1)
+    # Scroll to bottom of popup to enable Turn on activity
+    popup = driver.find_element(By.CSS_SELECTOR, ".cSvfje")
+    driver.execute_script("arguments[0].scroll(0, arguments[0].scrollHeight);", popup)
+    time.sleep(1)
+
+    finalButton = driver.find_element(
+        By.CSS_SELECTOR,
+        "button.VfPpkd-LgbsSe.VfPpkd-LgbsSe-OWXEXe-k8QpJ.VfPpkd-LgbsSe-OWXEXe-dgl2Hf.nCP5yc.AjY5Oe.DuMIQc.LQeN7.QWgF9b",
+    )
+    finalButton.click()
+    print("Activity is turned on")
+
+
+
+def turn_off_activity(driver):
+    activity_controls_url = "https://myactivity.google.com/activitycontrols?settings=search&utm_source=my-activity&facs=1"
+    driver.get(activity_controls_url)
+
+    try:
+        turnoffButton = driver.find_element("xpath", '//span[text()="Turn off"]')
+        turnoffButton.click()
+    except NoSuchElementException:
+        driver.find_element("xpath", '//span[text()="Turn on"]')
+        print("Activity is already off")
+        return
+
+    time.sleep(2)
+    finalButton = driver.find_element(
+        By.CSS_SELECTOR, "li.FFr0qd.VfPpkd-StrnGf-rymPhb-ibnC6b"
+    )
+    finalButton.click()
+
+    time.sleep(1)
+
+    gotitButton = driver.find_element(
+        "xpath", '//span[text()="Got it"]'
+    )
+    gotitButton.click()
+    print("Activity is turned off")
