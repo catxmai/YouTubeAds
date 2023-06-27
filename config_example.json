@@ -1,7 +1,5 @@
 {
 	"username": "johndoe123",
 	"password": "password123",
-	"user_data": "C:\\Users\\jdoe\\Documents\\YouTubeAdStudy\\UserData",
-	"ad_personalization_on": false,
-	"activity_on": true
+	"user_data": "C:\\Users\\jdoe\\Documents\\YouTubeAdStudy\\UserData"
 }

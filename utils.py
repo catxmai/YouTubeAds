@@ -64,13 +64,6 @@ def create_driver(config_path="", headless=True):
     if 'username' in config:
         check_login(driver, config['username']+"@gmail.com")
 
-    if config["activity_on"]:
-        turn_on_activity(driver)
-        turn_on_youtube_history(driver)
-    else:
-        turn_off_activity(driver)
-        turn_off_youtube_history(driver)
-
     return driver
 
 
@@ -161,6 +154,7 @@ def turn_on_activity(driver):
     # Scroll to bottom of popup to enable Turn on activity
     popup = driver.find_element(By.CSS_SELECTOR, ".cSvfje")
     driver.execute_script("arguments[0].scroll(0, arguments[0].scrollHeight);", popup)
+
     time.sleep(1)
 
     finalButton = driver.find_element(
@@ -168,7 +162,16 @@ def turn_on_activity(driver):
         "button.VfPpkd-LgbsSe.VfPpkd-LgbsSe-OWXEXe-k8QpJ.VfPpkd-LgbsSe-OWXEXe-dgl2Hf.nCP5yc.AjY5Oe.DuMIQc.LQeN7.QWgF9b",
     )
     finalButton.click()
+
     time.sleep(1)
+    try:
+        gotitButton = driver.find_element(
+            "xpath", '//span[text()="Got it"]'
+        )
+        gotitButton.click()
+    except NoSuchElementException:
+        pass
+
     print("Activity is turned on")
 
 
@@ -192,11 +195,14 @@ def turn_off_activity(driver):
     finalButton.click()
 
     time.sleep(1)
+    try:
+        gotitButton = driver.find_element(
+            "xpath", '//span[text()="Got it"]'
+        )
+        gotitButton.click()
+    except NoSuchElementException:
+        pass
 
-    gotitButton = driver.find_element(
-        "xpath", '//span[text()="Got it"]'
-    )
-    gotitButton.click()
     print("Activity is turned off")
 
 
@@ -213,13 +219,10 @@ def turn_off_youtube_history(driver):
         print("YouTube history is already off")
         return
     
-    
     time.sleep(1)
-
     pauseButton = driver.find_element(
         By.CSS_SELECTOR, "button.VfPpkd-LgbsSe.VfPpkd-LgbsSe-OWXEXe-k8QpJ.VfPpkd-LgbsSe-OWXEXe-dgl2Hf.nCP5yc.AjY5Oe.DuMIQc.LQeN7.yARu6e"
-    )
-    
+    ) 
     pauseButton.click()
  
     time.sleep(1)
@@ -257,7 +260,6 @@ def turn_on_youtube_history(driver):
         pass
 
     time.sleep(1)
-
     try:
         gotitButton = driver.find_element(
             "xpath", '//span[text()="Got it"]'
@@ -267,3 +269,47 @@ def turn_on_youtube_history(driver):
         pass
 
     print("YouTube history is turned on")
+
+
+def delete_activity(driver):
+
+    activity_history_url = "https://myactivity.google.com/myactivity"
+    driver.get(activity_history_url)
+
+    deleteButton = driver.find_element("xpath", '//span[text()="Delete"]')
+    driver.execute_script("arguments[0].click();", deleteButton)
+
+    alltimeButton = driver.find_element(
+        By.CSS_SELECTOR, "div.cSvfje > ul > li:nth-child(3)"
+    )
+    alltimeButton.click()
+
+    time.sleep(2)
+
+    delete_button = driver.find_element("xpath", '//span[text()="Delete"]')
+    driver.execute_script("arguments[0].click();", delete_button)
+
+    try:
+        finaldeleteButton = driver.find_element(
+            By.CSS_SELECTOR,
+            "button.VfPpkd-LgbsSe.VfPpkd-LgbsSe-OWXEXe-k8QpJ.nCP5yc.AjY5Oe.DuMIQc.LQeN7.e6p9Rc",
+        )
+        finaldeleteButton.click()
+    except NoSuchElementException:
+        no_activity_text = driver.find_element(By.CLASS_NAME, "oDnphc").get_attribute("innerHTML")
+        if "You have no selected activity" in no_activity_text:
+            print("No activity to delete")
+            return
+
+    try:
+        gotitButton = driver.find_element(
+            "xpath", '//span[text()="Got it"]'
+        )
+        gotitButton.click()
+    except NoSuchElementException:
+        pass
+
+    print("Activity is deleted")
+
+
+# personalized_ads_button V5g4xf-LgbsSe  V5g4xf-LgbsSe-OWXEXe-Bz112c-UbuQg V5g4xf-LgbsSe-OWXEXe-eIzVJe
