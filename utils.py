@@ -60,9 +60,12 @@ def create_driver(config_path="", headless=True):
     driver = webdriver.Chrome(options = options)
 
     try:
-        youtube_login(driver, config['username'], config['password'] )
+        youtube_login(driver, config['username'], config['password'])
     except:
         pass
+
+    check_login(driver, config['username']+"@gmail.com")
+
     return driver
 
 
@@ -87,6 +90,13 @@ def youtube_login(driver: webdriver.Chrome, username, password):
     time.sleep(1)
     pEntry.send_keys(Keys.RETURN)
     time.sleep(2)
+
+
+
+def check_login(driver, email):
+    driver.get("https://www.gmail.com")
+    time.sleep(1)
+    assert(email in driver.title)
 
 
 def get_test_id():
