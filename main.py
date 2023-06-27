@@ -12,13 +12,22 @@ from selenium.common.exceptions import WebDriverException
 from selenium.common.exceptions import NoSuchWindowException
 
 VIDEO_COUNT = 0
+AVAILABLE_VIDEO_COUNT = 0
 
-def run_video_list(config_path, mode, headless, sleep, video_list, start_index, end_index, output, log_file):
+def run_video_list(config_path, mode, headless, sleep, video_list,
+                   start_index, end_index, until_number_of_available_videos, output, log_file):
     global VIDEO_COUNT
+    global AVAILABLE_VIDEO_COUNT
     
     df = pd.read_csv(video_list)
+        
+    if until_number_of_available_videos:
+        end = len(df)
+    else:
+        end = end_index
+
     url_list = [
-        (df_index,"https://www.youtube.com/watch?v="+ i['videoid']) for df_index, i in df[start_index:end_index].iterrows()
+        (df_index,"https://www.youtube.com/watch?v="+ i['videoid']) for df_index, i in df[start_index:end].iterrows()
     ]
 
     driver = create_driver(config_path, headless=headless) 
@@ -36,18 +45,25 @@ def run_video_list(config_path, mode, headless, sleep, video_list, start_index, 
             # force write to disk. relatively expensive but data is more important
             output.flush()
             os.fsync(output)
+
             VIDEO_COUNT += 1
+            if "video_title" in video_data:
+                AVAILABLE_VIDEO_COUNT += 1
+            
+            if until_number_of_available_videos and AVAILABLE_VIDEO_COUNT == end_index:
+                break
+            
 
         except (NoSuchWindowException, WebDriverException) as e:
             log_file.write("Browser was closed or connection was lost \n")
             log_file.write("Restarting driver \n")
             driver.quit()
-            run_video_list(config_path, mode, headless, sleep, video_list, start_index+VIDEO_COUNT, end_index,
-                           output, log_file)
+            run_video_list(config_path, mode, headless, sleep, video_list,
+                           start_index+VIDEO_COUNT, end_index, until_number_of_available_videos, output, log_file)
             break
 
         except Exception as e:
-            log_file.write("UNEXPECTED")
+            log_file.write("UNEXPECTED \n")
             log_file.write(traceback.format_exc() + '\n')
             log_file.flush()
             os.fsync(log_file)
@@ -65,8 +81,9 @@ if __name__ == "__main__":
     config_path = "config.json" # If no config.json, leave ""
     # video_list = "conspiracy_videos_0_500000.csv"
     video_list = "control_videos_clean.csv"
+    until_number_of_available_videos = True # if True, crawl until reach end_index number of available videos
     start_index = 120
-    end_index = 130
+    end_index = 10 # end index of video list or number of available videos to crawl
     ##########################################################
 
 
@@ -91,17 +108,26 @@ if __name__ == "__main__":
         username = config_json['username']
     
     log_file.write(f"Using {username} account \n")
-    log_file.write(f"Using {video_list}[{start_index}:{end_index}]\n")
+    log_file.write(f"Using {video_list}[{start_index}:{end_index}], until_available: {until_number_of_available_videos}\n")
     log_file.write(f"Running on vm: {running_vm} \n")
 
     output.write(f"Using {username} account \n")
-    output.write(f"Using {video_list}[{start_index}:{end_index}]\n")
+    output.write(f"Using {video_list}[{start_index}:{end_index}], until_available: {until_number_of_available_videos}\n")
     output.write(f"Running on vm: {running_vm} \n")
 
     # Start collecting data
-    while VIDEO_COUNT < (end_index-start_index):
-        run_video_list(config_path, mode, headless, sleep, video_list,
-                       start_index+VIDEO_COUNT, end_index, output, log_file)
+
+    # putting inside a while loop so it can restart after browser is disconnected
+    if until_number_of_available_videos:
+        while AVAILABLE_VIDEO_COUNT < end_index:    
+            run_video_list(config_path, mode, headless, sleep, video_list,
+                           start_index+VIDEO_COUNT, end_index, until_number_of_available_videos, output, log_file)
+    else:
+        while VIDEO_COUNT < (end_index-start_index):    
+            run_video_list(config_path, mode, headless, sleep, video_list,
+                           start_index+VIDEO_COUNT, end_index, until_number_of_available_videos, output, log_file)
+
+    
         
     output.close()
     log_file.write(f"Finished in {time.time()-start_time}s \n")

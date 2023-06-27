@@ -51,7 +51,9 @@ def get_advertiser_info(driver):
         ad_container = driver.find_elements(By.CLASS_NAME, "G5HdJb-fmcmS")
         if ad_container:
             advertiser_name = ad_container[0].get_attribute("innerHTML")
-            advertiser_loc= ad_container[1].get_attribute("innerHTML")
+            advertiser_loc = ad_container[1].get_attribute("innerHTML")
+    except IndexError:
+        return advertiser_name, None
     except NoSuchElementException:
         pass
 
