@@ -30,8 +30,10 @@ def run_video_list(config_path, mode, headless, sleep, video_list,
         (df_index,"https://www.youtube.com/watch?v="+ i['videoid']) for df_index, i in df[start_index:end].iterrows()
     ]
 
+    # create driver and set up activity and ad personalization
     driver = create_driver(config_path, headless=headless) 
 
+    # start running through the video list
     for df_index, url in url_list:
         log_file.write(f"{df_index}, {url}\n")
 
@@ -83,7 +85,9 @@ if __name__ == "__main__":
     video_list = "control_videos_clean.csv"
     until_number_of_available_videos = True # if True, crawl until reach end_index number of available videos
     start_index = 120
-    end_index = 10 # end index of video list or number of available videos to crawl
+    end_index = 4 # end index of video list or number of available videos to crawl
+    ad_personalization_on = True
+    activity_on = True
     ##########################################################
 
 
@@ -101,14 +105,11 @@ if __name__ == "__main__":
 
     # Log username and dataset being used
     username = "anonymous"
-    ad_personalization_on, activity_on = None, None
     if config_path:
         config_f = open(config_path, 'r')
         config = json.load(config_f)
         config_f.close()
         username = config["username"]
-        ad_personalization_on = config["ad_personalization_on"]
-        activity_on = config["activity_on"]
     
     log_file.write(f"Using {username} account \n")
     log_file.write(f"Using {video_list}[{start_index}:{end_index}], until_available: {until_number_of_available_videos}\n")
@@ -119,6 +120,24 @@ if __name__ == "__main__":
     output.write(f"Using {video_list}[{start_index}:{end_index}], until_available: {until_number_of_available_videos}\n")
     output.write(f"Ad personalization on: {ad_personalization_on}, Activity on: {activity_on}\n")
     output.write(f"Running on vm: {running_vm} \n")
+
+
+    # create driver and set up activity and ad personalization
+    driver = create_driver(config_path, headless=False) 
+    if activity_on:
+        turn_on_activity(driver)
+        turn_on_youtube_history(driver)
+    else:
+        turn_off_activity(driver)
+        turn_off_youtube_history(driver)
+    
+    if ad_personalization_on:
+        turn_on_ad_personalization(driver)
+    else:
+        turn_off_ad_personalization(driver)
+    delete_activity(driver)
+    time.sleep(1)
+    driver.quit()
 
     # Start collecting data
 
