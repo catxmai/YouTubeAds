@@ -138,13 +138,70 @@ def collect_brands(driver):
         return None 
     
 
+def turn_on_ad_personalization(driver):
+
+    driver.get("https://myadcenter.google.com/")
+
+    try:
+        toggle_button = driver.find_element(By.CSS_SELECTOR, ".ie6Hvb-eIzVJe-LgbsSe.nOY0Nb.sly7Kb.DmnIhf")
+        driver.execute_script("arguments[0].click();", toggle_button)
+    except NoSuchElementException:
+        driver.find_element(By.CSS_SELECTOR, ".ie6Hvb-eIzVJe-LgbsSe.nOY0Nb.sly7Kb.YFjIb")
+        print("Ad personalization is already on")
+        return
+    
+    time.sleep(1)
+
+    possible_buttons = driver.find_elements(By.CSS_SELECTOR, "button.mUIrbf-LgbsSe.mUIrbf-LgbsSe-OWXEXe-dgl2Hf")
+    found = False
+    for button in possible_buttons:
+        if button.get_attribute("data-mdc-dialog-action") == "ok":
+            driver.execute_script("arguments[0].click();", button)
+            found = True
+            break
+    
+    if not found:
+        raise AssertionError("turn on button is not accessible")
+
+    print("Ad personalization is turned on")
+    
+
+def turn_off_ad_personalization(driver):
+
+    driver.get("https://myadcenter.google.com/")
+
+    try:
+        toggle_button = driver.find_element(By.CSS_SELECTOR, ".ie6Hvb-eIzVJe-LgbsSe.nOY0Nb.sly7Kb.YFjIb")
+        driver.execute_script("arguments[0].click();", toggle_button)
+    except NoSuchElementException:
+        driver.find_element(By.CSS_SELECTOR, ".ie6Hvb-eIzVJe-LgbsSe.nOY0Nb.sly7Kb.DmnIhf")
+        print("Ad personalization is already off")
+        return
+    
+    time.sleep(1)
+
+    possible_buttons = driver.find_elements(By.CSS_SELECTOR, "button.mUIrbf-LgbsSe.mUIrbf-LgbsSe-OWXEXe-dgl2Hf")
+    found = False
+    for button in possible_buttons:
+        if button.get_attribute("data-mdc-dialog-action") == "ok":
+            driver.execute_script("arguments[0].click();", button)
+            found = True
+            break
+    
+    if not found:
+        raise AssertionError("turn off button is not accessible")
+    
+    print("Ad personalization is turned off")
+    
+    
+
 def turn_on_activity(driver):
     activity_controls_url = "https://myactivity.google.com/activitycontrols?settings=search&utm_source=my-activity&facs=1"
     driver.get(activity_controls_url)
 
     try:
-        turnonButton = driver.find_element("xpath", '//span[text()="Turn on"]')
-        turnonButton.click()
+        turn_on_button = driver.find_element("xpath", '//span[text()="Turn on"]')
+        turn_on_button.click()
     except NoSuchElementException:
         driver.find_element("xpath", '//span[text()="Turn off"]')
         print("Activity is already on")
@@ -157,20 +214,11 @@ def turn_on_activity(driver):
 
     time.sleep(1)
 
-    finalButton = driver.find_element(
+    final_button = driver.find_element(
         By.CSS_SELECTOR,
         "button.VfPpkd-LgbsSe.VfPpkd-LgbsSe-OWXEXe-k8QpJ.VfPpkd-LgbsSe-OWXEXe-dgl2Hf.nCP5yc.AjY5Oe.DuMIQc.LQeN7.QWgF9b",
     )
-    finalButton.click()
-
-    time.sleep(1)
-    try:
-        gotitButton = driver.find_element(
-            "xpath", '//span[text()="Got it"]'
-        )
-        gotitButton.click()
-    except NoSuchElementException:
-        pass
+    final_button.click()
 
     print("Activity is turned on")
 
@@ -181,27 +229,18 @@ def turn_off_activity(driver):
     driver.get(activity_controls_url)
 
     try:
-        turnoffButton = driver.find_element("xpath", '//span[text()="Turn off"]')
-        turnoffButton.click()
+        turn_off_button = driver.find_element("xpath", '//span[text()="Turn off"]')
+        turn_off_button.click()
     except NoSuchElementException:
         driver.find_element("xpath", '//span[text()="Turn on"]')
         print("Activity is already off")
         return
 
     time.sleep(2)
-    finalButton = driver.find_element(
+    final_button = driver.find_element(
         By.CSS_SELECTOR, "li.FFr0qd.VfPpkd-StrnGf-rymPhb-ibnC6b"
     )
-    finalButton.click()
-
-    time.sleep(1)
-    try:
-        gotitButton = driver.find_element(
-            "xpath", '//span[text()="Got it"]'
-        )
-        gotitButton.click()
-    except NoSuchElementException:
-        pass
+    final_button.click()
 
     print("Activity is turned off")
 
@@ -212,27 +251,18 @@ def turn_off_youtube_history(driver):
     driver.get(history_controls_url)
 
     try:
-        turnoffButton = driver.find_element("xpath", '//span[text()="Turn off"]')
-        turnoffButton.click()
+        turn_off_button = driver.find_element("xpath", '//span[text()="Turn off"]')
+        turn_off_button.click()
     except NoSuchElementException:
         driver.find_element("xpath", '//span[text()="Turn on"]')
         print("YouTube history is already off")
         return
     
     time.sleep(1)
-    pauseButton = driver.find_element(
+    pause_button = driver.find_element(
         By.CSS_SELECTOR, "button.VfPpkd-LgbsSe.VfPpkd-LgbsSe-OWXEXe-k8QpJ.VfPpkd-LgbsSe-OWXEXe-dgl2Hf.nCP5yc.AjY5Oe.DuMIQc.LQeN7.yARu6e"
     ) 
-    pauseButton.click()
- 
-    time.sleep(1)
-    try:
-        gotitButton = driver.find_element(
-            "xpath", '//span[text()="Got it"]'
-        )
-        gotitButton.click()
-    except NoSuchElementException:
-        pass
+    pause_button.click()
 
     print("YouTube history is turned off")
 
@@ -242,8 +272,8 @@ def turn_on_youtube_history(driver):
     driver.get(history_controls_url)
     
     try:
-        turnonButton = driver.find_element("xpath", '//span[text()="Turn on"]')
-        turnonButton.click()
+        turn_on_button = driver.find_element("xpath", '//span[text()="Turn on"]')
+        turn_on_button.click()
     except NoSuchElementException:
         driver.find_element("xpath", '//span[text()="Turn off"]')
         print("YouTube history is already on")
@@ -251,20 +281,11 @@ def turn_on_youtube_history(driver):
 
     time.sleep(1)
     try:
-        finalButton = driver.find_element(
+        final_button = driver.find_element(
             By.CSS_SELECTOR,
             "button.VfPpkd-LgbsSe.VfPpkd-LgbsSe-OWXEXe-k8QpJ.VfPpkd-LgbsSe-OWXEXe-dgl2Hf.nCP5yc.AjY5Oe.DuMIQc.LQeN7.yARu6e",
         )
-        finalButton.click()
-    except NoSuchElementException:
-        pass
-
-    time.sleep(1)
-    try:
-        gotitButton = driver.find_element(
-            "xpath", '//span[text()="Got it"]'
-        )
-        gotitButton.click()
+        final_button.click()
     except NoSuchElementException:
         pass
 
@@ -276,13 +297,13 @@ def delete_activity(driver):
     activity_history_url = "https://myactivity.google.com/myactivity"
     driver.get(activity_history_url)
 
-    deleteButton = driver.find_element("xpath", '//span[text()="Delete"]')
-    driver.execute_script("arguments[0].click();", deleteButton)
+    delete_button = driver.find_element("xpath", '//span[text()="Delete"]')
+    driver.execute_script("arguments[0].click();", delete_button)
 
-    alltimeButton = driver.find_element(
+    all_time_button = driver.find_element(
         By.CSS_SELECTOR, "div.cSvfje > ul > li:nth-child(3)"
     )
-    alltimeButton.click()
+    all_time_button.click()
 
     time.sleep(2)
 
@@ -290,26 +311,18 @@ def delete_activity(driver):
     driver.execute_script("arguments[0].click();", delete_button)
 
     try:
-        finaldeleteButton = driver.find_element(
+        final_delete_button = driver.find_element(
             By.CSS_SELECTOR,
             "button.VfPpkd-LgbsSe.VfPpkd-LgbsSe-OWXEXe-k8QpJ.nCP5yc.AjY5Oe.DuMIQc.LQeN7.e6p9Rc",
         )
-        finaldeleteButton.click()
+        final_delete_button.click()
     except NoSuchElementException:
         no_activity_text = driver.find_element(By.CLASS_NAME, "oDnphc").get_attribute("innerHTML")
         if "You have no selected activity" in no_activity_text:
             print("No activity to delete")
             return
 
-    try:
-        gotitButton = driver.find_element(
-            "xpath", '//span[text()="Got it"]'
-        )
-        gotitButton.click()
-    except NoSuchElementException:
-        pass
-
     print("Activity is deleted")
 
 
-# personalized_ads_button V5g4xf-LgbsSe  V5g4xf-LgbsSe-OWXEXe-Bz112c-UbuQg V5g4xf-LgbsSe-OWXEXe-eIzVJe
+

@@ -123,13 +123,18 @@ if __name__ == "__main__":
 
 
     # create driver and set up activity and ad personalization
-    driver = create_driver(config_path, headless=headless) 
+    driver = create_driver(config_path, headless=False) 
     if activity_on:
         turn_on_activity(driver)
         turn_on_youtube_history(driver)
     else:
         turn_off_activity(driver)
         turn_off_youtube_history(driver)
+    
+    if ad_personalization_on:
+        turn_on_ad_personalization(driver)
+    else:
+        turn_off_ad_personalization(driver)
     delete_activity(driver)
     time.sleep(1)
     driver.quit()
