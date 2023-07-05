@@ -94,7 +94,10 @@ def youtube_login(driver: webdriver.Chrome, username, password):
 def check_login(driver, email):
     driver.get("https://www.gmail.com")
     time.sleep(1)
-    assert(email in driver.title)
+    if email not in driver.title:
+        print("Login not successful")
+        # Assuming headless is False, can do verification step here
+        time.sleep(10000)
 
 
 def get_test_id():
