@@ -85,7 +85,7 @@ if __name__ == "__main__":
     video_list = "control_videos_clean.csv"
     until_number_of_available_videos = True # if True, crawl until reach end_index number of available videos
     start_index = 120
-    end_index = 4 # end index of video list or number of available videos to crawl
+    end_index = 5 # end index of video list or number of available videos to crawl
     ad_personalization_on = True
     activity_on = True
     ##########################################################
@@ -96,13 +96,6 @@ if __name__ == "__main__":
         if not os.path.exists(dir):
             os.makedirs(dir)
 
-    # generate timestamp to name the log and output file
-    _, test_str = get_test_id()
-    log_filename = f"logs/log_{test_str}.txt"
-    output_filename = f"output/output_{test_str}.json"
-    log_file = open(log_filename, "w")
-    output = open(output_filename, 'w', encoding='utf-8')
-
     # Log username and dataset being used
     username = "anonymous"
     if config_path:
@@ -110,6 +103,13 @@ if __name__ == "__main__":
         config = json.load(config_f)
         config_f.close()
         username = config["username"]
+
+    # generate timestamp to name the log and output file
+    test_str = f"{get_test_id()}_{username}"
+    log_filename = f"logs/log_{test_str}.txt"
+    output_filename = f"output/output_{test_str}.json"
+    log_file = open(log_filename, "w")
+    output = open(output_filename, 'w', encoding='utf-8')
     
     log_file.write(f"Using {username} account \n")
     log_file.write(f"Using {video_list}[{start_index}:{end_index}], until_available: {until_number_of_available_videos}\n")
@@ -136,7 +136,6 @@ if __name__ == "__main__":
     else:
         turn_off_ad_personalization(driver)
     delete_activity(driver)
-    time.sleep(1)
     driver.quit()
 
     # Start collecting data

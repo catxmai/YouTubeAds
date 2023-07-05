@@ -100,10 +100,9 @@ def check_login(driver, email):
 def get_test_id():
     # Generates an id for scraping run based on system time
     d = datetime.datetime.now()
-    test_str = '{date:%Y%m%d_%H%M}'.format(date = d)
-    test_id = int('{date:%Y%m%d%H%M%S}'.format(date = d))
+    test_str = '{date:%m%d_%H%M}'.format(date = d)
 
-    return test_id, test_str
+    return test_str
 
 
 def collect_interests(driver):
