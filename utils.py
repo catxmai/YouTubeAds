@@ -139,7 +139,7 @@ def collect_brands(driver):
     
 
 def turn_on_ad_personalization(driver):
-
+    time.sleep(1)
     driver.get("https://myadcenter.google.com/")
 
     try:
@@ -162,12 +162,19 @@ def turn_on_ad_personalization(driver):
     
     if not found:
         raise AssertionError("turn on button is not accessible")
+    
+    time.sleep(1)
+    try:
+        got_it_button = driver.find_element("xpath", '//span[text()="Got it"]')
+        got_it_button.click()
+    except NoSuchElementException:
+        pass
 
     print("Ad personalization is turned on")
     
 
 def turn_off_ad_personalization(driver):
-
+    time.sleep(1)
     driver.get("https://myadcenter.google.com/")
 
     try:
@@ -191,12 +198,20 @@ def turn_off_ad_personalization(driver):
     if not found:
         raise AssertionError("turn off button is not accessible")
     
+    time.sleep(1)
+    try:
+        got_it_button = driver.find_element("xpath", '//span[text()="Got it"]')
+        got_it_button.click()
+    except NoSuchElementException:
+        pass
+    
     print("Ad personalization is turned off")
     
     
 
 def turn_on_activity(driver):
-    activity_controls_url = "https://myactivity.google.com/activitycontrols?settings=search&utm_source=my-activity&facs=1"
+    activity_controls_url = "https://myactivity.google.com/activitycontrols?settings=search"
+    time.sleep(1)
     driver.get(activity_controls_url)
 
     try:
@@ -220,12 +235,20 @@ def turn_on_activity(driver):
     )
     final_button.click()
 
+    time.sleep(1)
+    try:
+        got_it_button = driver.find_element("xpath", '//span[text()="Got it"]')
+        got_it_button.click()
+    except NoSuchElementException:
+        pass
+
     print("Activity is turned on")
 
 
 
 def turn_off_activity(driver):
-    activity_controls_url = "https://myactivity.google.com/activitycontrols?settings=search&utm_source=my-activity&facs=1"
+    activity_controls_url = "https://myactivity.google.com/activitycontrols?settings=search"
+    time.sleep(1)
     driver.get(activity_controls_url)
 
     try:
@@ -242,12 +265,20 @@ def turn_off_activity(driver):
     )
     final_button.click()
 
+    time.sleep(1)
+    try:
+        got_it_button = driver.find_element("xpath", '//span[text()="Got it"]')
+        got_it_button.click()
+    except NoSuchElementException:
+        pass
+
     print("Activity is turned off")
 
 
 
 def turn_off_youtube_history(driver):
-    history_controls_url = "https://myactivity.google.com/product/youtube/controls?utm_source=my-activity"
+    history_controls_url = "https://myactivity.google.com/product/youtube/controls"
+    time.sleep(1)
     driver.get(history_controls_url)
 
     try:
@@ -264,11 +295,19 @@ def turn_off_youtube_history(driver):
     ) 
     pause_button.click()
 
+    time.sleep(1)
+    try:
+        got_it_button = driver.find_element("xpath", '//span[text()="Got it"]')
+        got_it_button.click()
+    except NoSuchElementException:
+        pass
+
     print("YouTube history is turned off")
 
 
 def turn_on_youtube_history(driver):
-    history_controls_url = "https://myactivity.google.com/product/youtube/controls?utm_source=my-activity"
+    history_controls_url = "https://myactivity.google.com/product/youtube/controls"
+    time.sleep(1)
     driver.get(history_controls_url)
     
     try:
@@ -289,12 +328,20 @@ def turn_on_youtube_history(driver):
     except NoSuchElementException:
         pass
 
+    time.sleep(1)
+    try:
+        got_it_button = driver.find_element("xpath", '//span[text()="Got it"]')
+        got_it_button.click()
+    except NoSuchElementException:
+        pass
+
     print("YouTube history is turned on")
 
 
 def delete_activity(driver):
 
     activity_history_url = "https://myactivity.google.com/myactivity"
+    time.sleep(1)
     driver.get(activity_history_url)
 
     delete_button = driver.find_element("xpath", '//span[text()="Delete"]')
@@ -321,6 +368,13 @@ def delete_activity(driver):
         if "You have no selected activity" in no_activity_text:
             print("No activity to delete")
             return
+        
+    time.sleep(1)
+    try:
+        got_it_button = driver.find_element("xpath", '//span[text()="Got it"]')
+        got_it_button.click()
+    except NoSuchElementException:
+        pass
 
     print("Activity is deleted")
 
