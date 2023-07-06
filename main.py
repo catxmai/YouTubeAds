@@ -136,7 +136,7 @@ if __name__ == "__main__":
         turn_on_ad_personalization(driver)
     else:
         turn_off_ad_personalization(driver)
-    # delete_activity(driver)
+    delete_activity(driver)
     driver.quit()
 
     # Start collecting data
