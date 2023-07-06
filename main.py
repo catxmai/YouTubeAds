@@ -41,6 +41,7 @@ def run_video_list(config_path, mode, headless, sleep, video_list,
             video_data = get_video_info(url, driver, mode=mode, sleep=sleep)
             video_data["df_index"] = df_index
             video_data["id"] = VIDEO_COUNT
+            video_data["avc"] = AVAILABLE_VIDEO_COUNT
 
             json.dump(video_data, output, ensure_ascii=True)
             output.write('\n')
@@ -105,7 +106,7 @@ if __name__ == "__main__":
         username = config["username"]
 
     # generate timestamp to name the log and output file
-    test_str = f"{get_test_id()}_{username}"
+    test_str = f"{get_test_id()}_{username[-2:]}"
     log_filename = f"logs/log_{test_str}.txt"
     output_filename = f"output/output_{test_str}.json"
     log_file = open(log_filename, "w")
