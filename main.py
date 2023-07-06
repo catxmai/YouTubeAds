@@ -78,21 +78,21 @@ if __name__ == "__main__":
     # CHANGE THESE BEFORE RUNNING
     ##########################################################
     running_vm = False # on gcp
-    headless = False # running without gui
+    headless = True # running without gui
     mode = "collect" # mode is "prime" or "collect"
     sleep = 0 # stay an extra number of seconds per video
     config_path = "config.json" # If no config.json, leave ""
-    # video_list = "conspiracy_videos_0_500000.csv"
-    video_list = "control_videos_clean.csv"
+    video_list = "conspiracy_videos_0_500000.csv"
+    # video_list = "control_videos_clean.csv"
     until_number_of_available_videos = True # if True, crawl until reach end_index number of available videos
-    start_index = 120
+    start_index = 12000
     end_index = 5 # end index of video list or number of available videos to crawl
     ad_personalization_on = True
     activity_on = True
     ##########################################################
 
 
-    dirs = ['logs', 'output']
+    dirs = ['logs', 'output', 'unavailable_screenshots']
     for dir in dirs:
         if not os.path.exists(dir):
             os.makedirs(dir)
@@ -106,7 +106,7 @@ if __name__ == "__main__":
         username = config["username"]
 
     # generate timestamp to name the log and output file
-    test_str = f"{get_test_id()}_{username[-2:]}"
+    test_str = f"{get_test_id()}_{username}"
     log_filename = f"logs/log_{test_str}.txt"
     output_filename = f"output/output_{test_str}.json"
     log_file = open(log_filename, "w")
@@ -136,7 +136,7 @@ if __name__ == "__main__":
         turn_on_ad_personalization(driver)
     else:
         turn_off_ad_personalization(driver)
-    delete_activity(driver)
+    # delete_activity(driver)
     driver.quit()
 
     # Start collecting data

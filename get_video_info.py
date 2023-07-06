@@ -1,9 +1,8 @@
-import logging
 import re
 import time
-import datetime
 import json
 
+from PIL import Image
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import *
@@ -34,6 +33,8 @@ def get_video_info(video_url, driver: webdriver.Chrome, mode="collect", sleep=0)
     try:
         play_video(driver)
     except ElementNotInteractableException:
+        current_stamp = get_test_id()
+        driver.save_screenshot(f"unavailable_screenshots/{current_stamp}_{video_id}.png")
         return {
             'video_id': video_id,
             'video_unavailable': True

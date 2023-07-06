@@ -14,3 +14,10 @@ if __name__ == "__main__":
 	# upload_from_directory(project_name, bucket_name, "UserData_catmaimx/", "UserData_catmaimx/")
 
 	driver = create_driver("config.json", headless=False)
+
+	turn_off_ad_personalization(driver)
+	turn_off_youtube_history(driver)
+	turn_on_ad_personalization(driver)
+	turn_on_activity(driver)
+	turn_on_youtube_history(driver)
+	turn_off_activity(driver)
