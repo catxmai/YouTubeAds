@@ -143,11 +143,11 @@ if __name__ == "__main__":
 
     # putting inside a while loop so it can restart after browser is disconnected
     if until_number_of_available_videos:
-        while AVAILABLE_VIDEO_COUNT < end_index:    
+        while AVAILABLE_VIDEO_COUNT < end_index or VIDEO_COUNT == len(video_list):    
             run_video_list(config_path, mode, headless, sleep, video_list,
                            start_index+VIDEO_COUNT, end_index, until_number_of_available_videos, output, log_file)
     else:
-        while VIDEO_COUNT < (end_index-start_index):    
+        while VIDEO_COUNT < (end_index-start_index) or VIDEO_COUNT == end_index:    
             run_video_list(config_path, mode, headless, sleep, video_list,
                            start_index+VIDEO_COUNT, end_index, until_number_of_available_videos, output, log_file)
 

@@ -12,7 +12,7 @@ if __name__ == "__main__":
 		os.chdir("..")
 
 	# CHANGE THIS
-	id = "0706_0227_happysquare88"
+	id = "0706_2010_happysquare88"
 	
 
 	ads = open(f"ads/ads_{id}.json", "w", encoding="utf-8")
