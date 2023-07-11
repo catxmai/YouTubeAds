@@ -154,16 +154,8 @@ def turn_on_ad_personalization(driver):
     
     time.sleep(1)
 
-    possible_buttons = driver.find_elements(By.CSS_SELECTOR, "button.mUIrbf-LgbsSe.mUIrbf-LgbsSe-OWXEXe-dgl2Hf")
-    found = False
-    for button in possible_buttons:
-        if button.get_attribute("data-mdc-dialog-action") == "ok":
-            driver.execute_script("arguments[0].click();", button)
-            found = True
-            break
-    
-    if not found:
-        raise AssertionError("turn on button is not accessible")
+    turn_on_button = driver.find_element(By.CSS_SELECTOR, "button.mUIrbf-LgbsSe.mUIrbf-LgbsSe-OWXEXe-dgl2Hf[data-mdc-dialog-action='ok']")
+    driver.execute_script("arguments[0].click();", turn_on_button)
     
     time.sleep(1)
     try:
@@ -189,16 +181,8 @@ def turn_off_ad_personalization(driver):
     
     time.sleep(1)
 
-    possible_buttons = driver.find_elements(By.CSS_SELECTOR, "button.mUIrbf-LgbsSe.mUIrbf-LgbsSe-OWXEXe-dgl2Hf")
-    found = False
-    for button in possible_buttons:
-        if button.get_attribute("data-mdc-dialog-action") == "ok":
-            driver.execute_script("arguments[0].click();", button)
-            found = True
-            break
-    
-    if not found:
-        raise AssertionError("turn off button is not accessible")
+    turn_off_button = driver.find_element(By.CSS_SELECTOR, "button.mUIrbf-LgbsSe.mUIrbf-LgbsSe-OWXEXe-dgl2Hf[data-mdc-dialog-action='ok']")
+    driver.execute_script("arguments[0].click();", turn_off_button)
     
     time.sleep(1)
     try:
