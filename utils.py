@@ -109,6 +109,8 @@ def get_test_id():
 
 
 def collect_interests(driver):
+
+    time.sleep(1)
     
     try:
         driver.get("https://myadcenter.google.com/customize")
@@ -122,6 +124,8 @@ def collect_interests(driver):
 
 def collect_brands(driver):
 
+    time.sleep(1)
+    
     try:
         driver.get("https://myadcenter.google.com/customize")
         brand_button = driver.find_elements(By.CSS_SELECTOR, ".VfPpkd-AznF2e.WbUJNb.FEsNhd")[1]
@@ -141,8 +145,10 @@ def collect_brands(driver):
     
 
 def turn_on_ad_personalization(driver):
+
     time.sleep(1)
-    driver.get("https://myadcenter.google.com/")
+    ad_center_url = "https://myadcenter.google.com/"
+    driver.get(ad_center_url)
 
     try:
         toggle_button = driver.find_element(By.CSS_SELECTOR, ".ie6Hvb-eIzVJe-LgbsSe.nOY0Nb.sly7Kb.DmnIhf")
@@ -168,8 +174,10 @@ def turn_on_ad_personalization(driver):
     
 
 def turn_off_ad_personalization(driver):
+
     time.sleep(1)
-    driver.get("https://myadcenter.google.com/")
+    ad_center_url = "https://myadcenter.google.com/"
+    driver.get(ad_center_url)
 
     try:
         toggle_button = driver.find_element(By.CSS_SELECTOR, ".ie6Hvb-eIzVJe-LgbsSe.nOY0Nb.sly7Kb.YFjIb")
@@ -196,8 +204,9 @@ def turn_off_ad_personalization(driver):
     
 
 def turn_on_activity(driver):
-    activity_controls_url = "https://myactivity.google.com/activitycontrols?settings=search"
+    
     time.sleep(1)
+    activity_controls_url = "https://myactivity.google.com/activitycontrols?settings=search"
     driver.get(activity_controls_url)
 
     try:
@@ -233,8 +242,9 @@ def turn_on_activity(driver):
 
 
 def turn_off_activity(driver):
-    activity_controls_url = "https://myactivity.google.com/activitycontrols?settings=search"
+
     time.sleep(1)
+    activity_controls_url = "https://myactivity.google.com/activitycontrols?settings=search"
     driver.get(activity_controls_url)
 
     try:
@@ -263,8 +273,9 @@ def turn_off_activity(driver):
 
 
 def turn_off_youtube_history(driver):
-    history_controls_url = "https://myactivity.google.com/product/youtube/controls"
+
     time.sleep(1)
+    history_controls_url = "https://myactivity.google.com/product/youtube/controls"
     driver.get(history_controls_url)
 
     try:
@@ -292,8 +303,9 @@ def turn_off_youtube_history(driver):
 
 
 def turn_on_youtube_history(driver):
-    history_controls_url = "https://myactivity.google.com/product/youtube/controls"
+
     time.sleep(1)
+    history_controls_url = "https://myactivity.google.com/product/youtube/controls"
     driver.get(history_controls_url)
     
     try:
@@ -326,8 +338,8 @@ def turn_on_youtube_history(driver):
 
 def delete_activity(driver):
 
-    activity_history_url = "https://myactivity.google.com/myactivity"
     time.sleep(1)
+    activity_history_url = "https://myactivity.google.com/myactivity"
     driver.get(activity_history_url)
 
     delete_button = driver.find_element("xpath", '//span[text()="Delete"]')
